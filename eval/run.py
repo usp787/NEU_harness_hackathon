@@ -18,6 +18,7 @@ them later without re-running anything.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import sys
@@ -37,10 +38,12 @@ from harness.db import DbConfig, connect  # noqa: E402
 from harness.memory import knowledge_mode  # noqa: E402
 
 OUT_DIR = ROOT / "eval" / "out"
+DEFAULT_QUESTIONS = ROOT / "data" / "questions.yaml"
 
 
-def load_questions(limit: int | None = None, only: str | None = None) -> list[dict]:
-    spec = yaml.safe_load((ROOT / "data" / "questions.yaml").read_text(encoding="utf-8"))
+def load_questions(limit: int | None = None, only: str | None = None,
+                   path: Path = DEFAULT_QUESTIONS) -> list[dict]:
+    spec = yaml.safe_load(path.read_text(encoding="utf-8"))
     qs = spec["questions"]
     if only:
         wanted = {s.strip().upper() for s in only.split(",")}
@@ -137,6 +140,9 @@ def main() -> int:
     ap.add_argument("--arm", choices=["baseline", "harness", "both", "dry"],
                     default="both")
     ap.add_argument("--limit", type=int, default=None)
+    ap.add_argument("--questions", type=Path, default=DEFAULT_QUESTIONS,
+                    help="Question YAML file (default: data/questions.yaml). "
+                         "Alternate files use their stem as the output tag unless --tag is set.")
     ap.add_argument("--only", type=str, default=None,
                     help="Comma-separated question ids or defect ids, e.g. D5,Q01")
     ap.add_argument("--verbose", action="store_true")
@@ -147,7 +153,16 @@ def main() -> int:
     args = ap.parse_args()
 
     cfg, admin = DbConfig(), DbConfig.admin()
-    questions = load_questions(args.limit, args.only)
+    questions = load_questions(args.limit, args.only, args.questions)
+    tag = args.tag
+    if tag is None and args.questions.resolve() != DEFAULT_QUESTIONS.resolve():
+        tag = args.questions.stem
+    question_path = args.questions.resolve()
+    question_source = {
+        "path": (question_path.relative_to(ROOT).as_posix()
+                 if question_path.is_relative_to(ROOT) else str(question_path)),
+        "sha256": hashlib.sha256(question_path.read_bytes()).hexdigest(),
+    }
     if not questions:
         print("No questions matched.", file=sys.stderr)
         return 1
@@ -183,9 +198,10 @@ def main() -> int:
         s["elapsed_s"] = round(time.time() - t0, 1)
         summaries[arm] = s
 
-        path = OUT_DIR / f"{arm}-{provider}{'-' + args.tag if args.tag else ''}.json"
+        path = OUT_DIR / f"{arm}-{provider}{'-' + tag if tag else ''}.json"
         path.write_text(json.dumps(
             {"arm": arm, "provider": provider,
+             "questions": question_source,
              # Recorded because the harness arm's result is meaningless without
              # it: the same code scores differently depending on whether its
              # business knowledge was hand-written or discovered.

@@ -22,6 +22,13 @@ eval/out/*
 !eval/out/harness-local-curated.json
 !eval/out/harness-local-discovered.json
 !eval/out/harness-local-discovered-v2.json
+# Yingzi's 35-question local evaluation and its provenance.
+!eval/out/baseline-local-yingzi-20260919.json
+!eval/out/harness-local-yingzi-20260919.json
+!eval/out/dry-gold-yingzi-20260919.json
+!eval/out/yingzi-20260919-metadata.json
+!eval/out/yingzi-20260919-report.md
+!eval/out/yingzi-20260919.log
 
 .DS_Store
 Thumbs.db

@@ -33,8 +33,8 @@ OUT_DIR = ROOT / "eval" / "out"
 DEFECT_ORDER = [f"D{i}" for i in range(1, 11)] + ["control"]
 
 
-def _load(arm: str, provider: str) -> dict | None:
-    p = OUT_DIR / f"{arm}-{provider}.json"
+def _load(arm: str, provider: str, tag: str | None = None) -> dict | None:
+    p = OUT_DIR / f"{arm}-{provider}{'-' + tag if tag else ''}.json"
     if not p.exists():
         return None
     return json.loads(p.read_text(encoding="utf-8"))
@@ -54,12 +54,13 @@ def _pct(c: int, n: int) -> str:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--provider", default=os.getenv("HARNESS_LLM", "local"))
+    ap.add_argument("--tag", default=None, help="Output tag used by eval/run.py.")
     args = ap.parse_args()
 
     console = Console()
-    base = _load("baseline", args.provider)
-    harn = _load("harness", args.provider)
-    dry = _load("dry", "gold")
+    base = _load("baseline", args.provider, args.tag)
+    harn = _load("harness", args.provider, args.tag)
+    dry = _load("dry", "gold", args.tag)
 
     if not base and not harn and not dry:
         console.print(f"[red]No results for provider {args.provider!r} in "
@@ -80,7 +81,8 @@ def main() -> int:
         return 0
 
     titles = _titles()
-    table = Table(title=f"Per-defect accuracy -- {args.provider}",
+    label = f"{args.provider} / {args.tag}" if args.tag else args.provider
+    table = Table(title=f"Per-defect accuracy -- {label}",
                   header_style="bold", show_lines=False)
     table.add_column("Defect", style="cyan", no_wrap=True)
     table.add_column("Baseline", justify="right")
