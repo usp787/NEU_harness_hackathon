@@ -40,6 +40,7 @@ def _emit(on_event: EventFn | None, **payload: Any) -> None:
 
 from . import glossary, joins, profile, schema_card
 from .db import DbConfig
+from .llm import ContextOverflowError
 from .execute import execute_sql, format_result_for_model
 from .llm import LLM
 
@@ -55,6 +56,11 @@ class AgentResult:
     steps: int = 0
     tool_calls: list[str] = field(default_factory=list)
     error: str | None = None
+    # Machine-readable companion to `error`, so the eval can separate "the
+    # prompt did not fit" from "the model got it wrong". Only set when the
+    # distinction changes how a run should be counted; None for an ordinary
+    # wrong answer. See ContextOverflowError in harness/llm.py.
+    error_kind: str | None = None
     usage: dict[str, int] = field(default_factory=dict)
     # True only when the model FINISHED -- it stopped of its own accord and
     # presented an answer. A run that died on a provider error or ran out of
@@ -96,6 +102,10 @@ def run_baseline(llm: LLM, question: str, cfg: DbConfig | None = None,
              {"role": "user", "content": question}],
             temperature=0.0,
         )
+    except ContextOverflowError as e:
+        res.error = f"Context overflow: {e}"
+        res.error_kind = "context_overflow"
+        return res
     except Exception as e:
         res.error = f"LLM call failed: {e}"
         return res
@@ -311,6 +321,10 @@ def run_harness(llm: LLM, question: str, cfg: DbConfig | None = None,
         res.steps = step + 1
         try:
             resp = llm.chat(messages, tools=TOOLS, temperature=0.0)
+        except ContextOverflowError as e:
+            res.error = f"Context overflow at step {res.steps}: {e}"
+            res.error_kind = "context_overflow"
+            break
         except Exception as e:
             res.error = f"LLM call failed at step {res.steps}: {e}"
             break

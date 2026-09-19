@@ -109,6 +109,7 @@ def run_arm(arm: str, questions: list[dict], llm, cfg: DbConfig,
             # What an unfinished run had reached. Recorded for triage, never graded.
             "abandoned_sql": res.abandoned_sql or None,
             "error": res.error,
+            "error_kind": res.error_kind,
             "mismatch": None if correct else explain_mismatch(gold, res.rows),
             "elapsed_s": round(time.time() - t0, 2),
             "usage": res.usage,
@@ -130,6 +131,14 @@ def run_arm(arm: str, questions: list[dict], llm, cfg: DbConfig,
 def summarize(records: list[dict]) -> dict:
     total = len(records)
     correct = sum(1 for r in records if r["correct"])
+    # A question whose prompt never fit in the context window was never put to
+    # the model, so it measures our budget rather than the model. It stays in
+    # `accuracy` (that denominator is what every committed result used, and
+    # moving it silently would make runs incomparable) but is also reported on
+    # its own, with a second figure over only the questions actually graded.
+    # Anything nonzero here means `accuracy` is understated -- read both.
+    overflow = sum(1 for r in records if r.get("error_kind") == "context_overflow")
+    graded = total - overflow
     by_defect: dict[str, dict[str, int]] = {}
     for r in records:
         tags = r["defect_ids"] or ["control"]
@@ -141,6 +150,9 @@ def summarize(records: list[dict]) -> dict:
         "total": total,
         "correct": correct,
         "accuracy": round(correct / total, 4) if total else 0.0,
+        "context_overflow": overflow,
+        "graded": graded,
+        "accuracy_graded": round(correct / graded, 4) if graded else 0.0,
         "by_defect": by_defect,
     }
 
@@ -222,6 +234,14 @@ def main() -> int:
             indent=2, default=str), encoding="utf-8")
         print(f"  -> {s['correct']}/{s['total']} = {s['accuracy']*100:.1f}%  "
               f"({s['elapsed_s']}s)   written to {path.relative_to(ROOT)}")
+        if s["context_overflow"]:
+            # Loud, because the failure it describes looks exactly like the
+            # model being wrong and would otherwise be read as a real result.
+            print(f"  !! {s['context_overflow']} of {s['total']} never fit in the "
+                  f"context window and were NOT put to the model.\n"
+                  f"     Over the {s['graded']} actually graded: "
+                  f"{s['accuracy_graded']*100:.1f}%. Raise -c on llama-server "
+                  f"before quoting the {s['accuracy']*100:.1f}% above.")
 
     if len(summaries) == 2:
         b, h = summaries["baseline"]["accuracy"], summaries["harness"]["accuracy"]

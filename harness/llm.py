@@ -46,6 +46,46 @@ import httpx
 _THINK_RE = re.compile(r"<think>.*?</think>\s*", re.DOTALL)
 
 
+class ContextOverflowError(RuntimeError):
+    """The prompt did not fit in the server's context window.
+
+    Deliberately its own type, not a generic provider failure. An overflow
+    means the model never saw the question at all, so it is a statement about
+    our context budget, not about the model's ability -- and grading it as a
+    wrong answer silently deflates the one number this project exists to
+    report. `eval/run.py` counts these separately for that reason.
+
+    Contrast the step-limit case, which IS a model failure (it saw everything
+    and still did not converge) and rightly scores as incorrect.
+    """
+
+    def __init__(self, message: str, n_prompt_tokens: int | None = None,
+                 n_ctx: int | None = None):
+        super().__init__(message)
+        self.n_prompt_tokens = n_prompt_tokens
+        self.n_ctx = n_ctx
+
+
+def _local_error(r: httpx.Response) -> Exception:
+    """Build an exception from a llama.cpp error response.
+
+    httpx's raise_for_status() is not usable here: it reports the status line
+    and throws the body away, and the body is the only part that says why.
+    llama.cpp returns a typed error -- for an overflow,
+    `{"type": "exceed_context_size_error", "n_prompt_tokens": N, "n_ctx": M}`
+    -- so match on that `type` rather than sniffing the prose, which is not a
+    stable interface across builds.
+    """
+    try:
+        err = ((r.json() or {}).get("error") or {})
+    except Exception:          # non-JSON body (proxy error page, truncated write)
+        err = {}
+    msg = err.get("message") or (r.text or "")[:300] or f"HTTP {r.status_code}"
+    if err.get("type") == "exceed_context_size_error":
+        return ContextOverflowError(msg, err.get("n_prompt_tokens"), err.get("n_ctx"))
+    return RuntimeError(f"llama.cpp HTTP {r.status_code}: {msg}")
+
+
 @dataclass
 class ToolCall:
     id: str
@@ -125,7 +165,8 @@ class LocalLLM:
             payload["chat_template_kwargs"] = {"enable_thinking": False}
 
         r = self._client.post(f"{self.base_url}/chat/completions", json=payload)
-        r.raise_for_status()
+        if r.is_error:
+            raise _local_error(r)
         data = r.json()
 
         choice = (data.get("choices") or [{}])[0]
