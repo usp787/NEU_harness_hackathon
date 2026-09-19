@@ -81,22 +81,31 @@ def run_arm(arm: str, questions: list[dict], llm, cfg: DbConfig,
 
         if arm == "dry":
             res = agent.AgentResult(question=q["question"],
-                                    final_sql=q["gold_sql"], rows=gold)
+                                    final_sql=q["gold_sql"], rows=gold,
+                                    answered=True)
         elif arm == "baseline":
             res = agent.run_baseline(llm, q["question"], cfg, ddl=ddl)
         else:
             res = agent.run_harness(llm, q["question"], cfg, toolbox=toolbox)
 
-        correct = bool(res.rows) and matches(gold, res.rows)
+        # `res.answered` is the false-pass guard, stated here as well as in the
+        # agent: only a run that reached a final answer can score. A run that
+        # exhausted its steps or died mid-flight returns no rows, so this is
+        # belt and braces -- but grading is exactly where the rule should be
+        # readable.
+        correct = res.answered and bool(res.rows) and matches(gold, res.rows)
         rec = {
             "id": qid,
             "arm": arm,
             "question": q["question"],
             "defect_ids": q.get("defect_ids") or [],
             "correct": correct,
+            "answered": res.answered,
             "steps": res.steps,
             "tool_calls": res.tool_calls,
             "final_sql": res.final_sql,
+            # What an unfinished run had reached. Recorded for triage, never graded.
+            "abandoned_sql": res.abandoned_sql or None,
             "error": res.error,
             "mismatch": None if correct else explain_mismatch(gold, res.rows),
             "elapsed_s": round(time.time() - t0, 2),

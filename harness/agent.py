@@ -56,6 +56,13 @@ class AgentResult:
     tool_calls: list[str] = field(default_factory=list)
     error: str | None = None
     usage: dict[str, int] = field(default_factory=dict)
+    # True only when the model FINISHED -- it stopped of its own accord and
+    # presented an answer. A run that died on a provider error or ran out of
+    # steps did not answer, however good the last query it happened to execute
+    # was, and must not score. `final_sql`/`rows` are empty in that case; the
+    # query it had reached is kept in `abandoned_sql` for triage only.
+    answered: bool = False
+    abandoned_sql: str = ""
 
     @property
     def produced_sql(self) -> bool:
@@ -106,6 +113,7 @@ def run_baseline(llm: LLM, question: str, cfg: DbConfig | None = None,
     out = execute_sql(sql, cfg, skip_explain=True)
     if out["ok"]:
         res.rows = out["rows"]
+        res.answered = True
     else:
         res.error = out["error"]
     return res
@@ -312,14 +320,11 @@ def run_harness(llm: LLM, question: str, cfg: DbConfig | None = None,
                 res.usage[k] = res.usage.get(k, 0) + v
 
         if not resp.wants_tool:
+            # The model stopped of its own accord: this turn, and only this
+            # turn, is the final answer.
+            res.answered = True
             res.answer_text = resp.text
-            # A model that answers in prose may still have embedded its query.
-            if not box.last_sql:
-                sql = extract_sql(resp.text)
-                if sql:
-                    out = execute_sql(sql, cfg)
-                    if out["ok"]:
-                        box.last_result, box.last_sql = out, sql
+            _adopt_closing_sql(box, resp.text, cfg)
             _emit(on_event, type="answer", arm="harness", text=resp.text)
             break
 
@@ -352,13 +357,63 @@ def run_harness(llm: LLM, question: str, cfg: DbConfig | None = None,
     else:
         res.error = f"Hit the {max_steps}-step limit without a final answer."
 
-    if box.last_result is not None:
+    # Final-answer selection is EXPLICIT, not retroactive.
+    #
+    # Grading the last successful execute_sql whatever happened afterwards was
+    # a false-pass path: run 1 of the discovered arm scored Q02 and Q15 as
+    # passes when both ran a correct query, kept exploring to the 12-step limit
+    # and never reported an answer. Same shape for a provider error mid-run.
+    # A run that did not finish has no answer to grade -- the query it had
+    # reached is preserved for triage and deliberately not scored.
+    if not res.answered:
+        res.abandoned_sql = box.last_sql
+    elif box.last_result is not None:
         res.final_sql = box.last_sql
         res.rows = box.last_result["rows"]
         _emit(on_event, type="sql", arm="harness", sql=res.final_sql)
-    elif not res.error:
+    else:
         res.error = "Agent never executed a successful query."
     return res
+
+
+def _adopt_closing_sql(box: _ToolBox, text: str, cfg: DbConfig) -> None:
+    """Resolve which query the model's closing message stands behind.
+
+    Two cases, deliberately asymmetric:
+
+      * Nothing ran yet. Whatever SQL we can find in the reply is the only
+        candidate there is, so the loose scan applies -- a model that answers
+        in prose instead of calling the tool should not be failed for that.
+      * A query already ran. Only an explicit fenced ```sql block overrides it.
+        A closing message naming a different query than the one that was
+        executed is the third false-pass shape the runtime review demonstrated
+        (answer `SELECT 999` after an earlier correct count of 40, graded on
+        the 40). The loose scan is not used here because it trips over
+        ordinary prose ("...to select the top spender") and the query it would
+        be overwriting demonstrably worked.
+
+    An override that does not execute is discarded rather than fatal: a typo in
+    a restated query should not throw away the result the model actually got.
+    """
+    if box.last_sql:
+        sql = _fenced_sql(text)
+        if not sql or _same_sql(sql, box.last_sql):
+            return
+    else:
+        sql = extract_sql(text)
+        if not sql:
+            return
+    out = execute_sql(sql, cfg)
+    if out["ok"]:
+        box.last_result, box.last_sql = out, sql
+
+
+def _same_sql(a: str, b: str) -> bool:
+    """Whitespace- and case-insensitive equality, so a restated query does not
+    count as a different one."""
+    def norm(s: str) -> str:
+        return " ".join(s.split()).rstrip(";").lower()
+    return norm(a) == norm(b)
 
 
 def _tool_call_payload(tc) -> dict[str, Any]:
@@ -389,9 +444,9 @@ def extract_sql(text: str) -> str:
     """
     if not text:
         return ""
-    m = _SQL_FENCE.search(text)
-    if m and m.group(1).strip():
-        return m.group(1).strip().rstrip(";")
+    fenced = _fenced_sql(text)
+    if fenced:
+        return fenced
 
     lowered = text.lower()
     for kw in ("select ", "with "):
@@ -400,6 +455,12 @@ def extract_sql(text: str) -> str:
             candidate = text[i:].strip()
             return candidate.split(";")[0].strip()
     return ""
+
+
+def _fenced_sql(text: str) -> str:
+    """Only what the model put in a ```sql block -- the unambiguous form."""
+    m = _SQL_FENCE.search(text or "")
+    return m.group(1).strip().rstrip(";") if m and m.group(1).strip() else ""
 
 
 def make_toolbox(cfg: DbConfig | None = None) -> _ToolBox:

@@ -92,6 +92,12 @@ def _runs() -> list[dict[str, Any]]:
             payload = json.loads(p.read_text(encoding="utf-8"))
         except (json.JSONDecodeError, OSError):
             continue
+        # eval/out also holds hand-written provenance next to the results
+        # (yingzi-20260919-metadata.json). Those are not runs: counting one
+        # crashed `python -m web.build_data` on a missing `arm`, and it still
+        # showed up in the dashboard's file count.
+        if not isinstance(payload, dict) or "arm" not in payload or "summary" not in payload:
+            continue
         payload["file"] = p.name
         payload["mtime"] = p.stat().st_mtime
         out.append(payload)
@@ -275,9 +281,12 @@ def _run_stream(req: AskRequest) -> Iterator[str]:
                 rows = _jsonable(res.rows)
                 correct = None
                 if gold is not None:
-                    correct = bool(res.rows) and matches(gold, res.rows)
+                    # Same rule as the eval: an unfinished run does not score.
+                    correct = res.answered and bool(res.rows) and matches(gold, res.rows)
                 emit({"type": "arm_done", "arm": arm, "elapsed_s": round(time.time() - t0, 2),
-                      "sql": res.final_sql, "rows": rows[:50],
+                      # An unfinished run still shows the query it reached, so
+                      # the trace stays readable; it just is not the answer.
+                      "sql": res.final_sql or res.abandoned_sql, "rows": rows[:50],
                       "row_count": len(rows), "steps": res.steps,
                       "tool_calls": res.tool_calls, "error": friendly_error(res.error),
                       "answer_text": res.answer_text, "usage": res.usage,

@@ -33,7 +33,11 @@ from harness.llm import AnthropicLLM, LLMResponse, ToolCall, strip_thinking  # n
 
 
 class ScriptedLLM:
-    """Replays a fixed list of LLMResponses and records what it was sent."""
+    """Replays a fixed list of LLMResponses and records what it was sent.
+
+    An Exception in the script is raised instead of returned, which is how a
+    provider dying mid-run is reproduced without a network.
+    """
 
     name = "scripted"
 
@@ -47,7 +51,10 @@ class ScriptedLLM:
         self.tools_seen.append(tools or [])
         if not self.script:
             return LLMResponse(text="(script exhausted)")
-        return self.script.pop(0)
+        nxt = self.script.pop(0)
+        if isinstance(nxt, Exception):
+            raise nxt
+        return nxt
 
 
 def _gold(sql: str) -> list[dict]:
@@ -188,6 +195,93 @@ def test_harness_respects_the_step_limit():
     res = agent.run_harness(llm, "loop forever", max_steps=3)
     assert res.steps == 3
     assert res.error and "step limit" in res.error
+
+
+# ---------------------------------------------------------------------------
+# Final-answer selection: a run that did not finish must not score
+#
+# Observed for real in run 1 of the discovered arm -- Q02 and Q15 each ran a
+# correct query, kept exploring to the 12-step limit, never reported an answer,
+# and were graded as passes off the query they had reached. That is the whole
+# 23/31 vs 21/31 gap in the README's discovered-arm table.
+# ---------------------------------------------------------------------------
+
+_COUNT_EMPLOYEES = "SELECT COUNT(*) AS n FROM employees"
+
+
+def test_step_limit_does_not_score_the_query_it_reached():
+    llm = ScriptedLLM([
+        LLMResponse(tool_calls=[ToolCall("c1", "execute_sql", {"sql": _COUNT_EMPLOYEES})]),
+        LLMResponse(tool_calls=[ToolCall("c2", "infer_joins", {})]),
+        LLMResponse(tool_calls=[ToolCall("c3", "infer_joins", {})]),
+    ])
+    res = agent.run_harness(llm, "How many employees?", max_steps=3)
+
+    assert res.error and "step limit" in res.error
+    assert res.answered is False
+    assert res.rows == [] and res.final_sql == ""   # nothing to grade
+    assert "employees" in res.abandoned_sql, "the query it reached is kept for triage"
+
+
+def test_provider_error_does_not_score_the_query_it_reached():
+    llm = ScriptedLLM([
+        LLMResponse(tool_calls=[ToolCall("c1", "execute_sql", {"sql": _COUNT_EMPLOYEES})]),
+        RuntimeError("connection reset by peer"),
+    ])
+    res = agent.run_harness(llm, "How many employees?")
+
+    assert res.error and "connection reset" in res.error
+    assert res.answered is False
+    assert res.rows == [] and res.final_sql == ""
+    assert "employees" in res.abandoned_sql
+
+
+def test_the_closing_message_may_override_the_query_that_ran():
+    """The model answers with a DIFFERENT fenced query than the one it ran.
+
+    Scored on what it stands behind, not on the better number it happened to
+    produce three steps earlier.
+    """
+    llm = ScriptedLLM([
+        LLMResponse(tool_calls=[ToolCall("c1", "execute_sql", {"sql": _COUNT_EMPLOYEES})]),
+        LLMResponse(text="Final answer:\n```sql\nSELECT 999 AS n\n```"),
+    ])
+    res = agent.run_harness(llm, "How many employees?")
+
+    assert res.answered is True
+    assert res.rows == [{"n": 999}], "the stated query is the answer, not the earlier 40"
+
+
+def test_prose_mentioning_select_does_not_override_the_query_that_ran():
+    """The loose SELECT scan is for rescuing a run that never executed
+    anything. Letting it fire here would let ordinary narration overwrite a
+    query that demonstrably worked."""
+    llm = ScriptedLLM([
+        LLMResponse(tool_calls=[ToolCall("c1", "execute_sql", {"sql": _COUNT_EMPLOYEES})]),
+        LLMResponse(text="There are 40 employees. I did select count(*) from employees "
+                         "rather than counting distinct names."),
+    ])
+    res = agent.run_harness(llm, "How many employees?")
+    assert res.rows == [{"n": 40}]
+
+
+def test_a_broken_closing_query_keeps_the_result_that_ran():
+    """A typo in a restated query should not throw away a real result."""
+    llm = ScriptedLLM([
+        LLMResponse(tool_calls=[ToolCall("c1", "execute_sql", {"sql": _COUNT_EMPLOYEES})]),
+        LLMResponse(text="40.\n```sql\nSELECT COUNT(*) AS n FROM employee\n```"),
+    ])
+    res = agent.run_harness(llm, "How many employees?")
+    assert res.answered is True
+    assert res.rows == [{"n": 40}]
+
+
+def test_harness_rescues_sql_from_a_prose_only_answer():
+    """No tool call at all: the reply is the only place a query can be."""
+    llm = ScriptedLLM([LLMResponse(text=f"```sql\n{_COUNT_EMPLOYEES}\n```")])
+    res = agent.run_harness(llm, "How many employees?")
+    assert res.answered is True
+    assert res.rows == [{"n": 40}]
 
 
 def test_harness_schema_card_is_in_the_system_prompt():

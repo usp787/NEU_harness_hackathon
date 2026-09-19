@@ -80,6 +80,12 @@ def main() -> int:
             notes.append(f"{p.name}: unreadable, skipped ({type(e).__name__})")
             continue
 
+        # Provenance files live here too and are deliberately not baked in --
+        # same rule as web/server.py's _runs().
+        if not isinstance(live, dict) or "arm" not in live or "summary" not in live:
+            notes.append(f"{p.name}: not a result file, skipped")
+            continue
+
         if baked is None:
             problems.append(f"{p.name}: present in eval/out but not baked into data.js")
             continue

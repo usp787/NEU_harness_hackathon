@@ -430,7 +430,9 @@ everyone; they are instrumentation, not answers.
 ### Measured
 
 Qwen3.5-9B Q4_K_M, local, 31 questions, same database, same day. *clean*
-excludes passes where the agent never actually finished — see below.
+excludes passes where the agent never actually finished — see below. These are
+the numbers as measured *before* the false-pass fix, which is why the two
+columns differ at all; the post-fix re-measurement is in that section.
 
 | Arm | Knowledge | Score | clean | Tokens |
 |---|---|---|---|---|
@@ -489,14 +491,54 @@ Making the field required also got it *populated*, not *good*: three of six
 claims filled `guidance` with a copy of their own verification query instead of
 a usage pattern.
 
-### The false-pass path, now observed live
+### The false-pass path, observed live and now closed
 
 The runtime review flagged that grading the last *successful* `execute_sql` lets
 a run that errors or exhausts its steps still score, but could only demonstrate
 it with a scripted model. Run 1 hit it for real: Q02 and Q15 both ran a correct
 query, kept exploring to the 12-step limit, never reported an answer, and were
-graded as passes. That is the 23/31 vs 21/31 gap in the table. The fix is an
-explicit final-answer selection rather than a retroactive one; it is not done.
+graded as passes. That is the 23/31 vs 21/31 gap in the table, and it is still
+sitting in the committed evidence — `harness-local-discovered.json` records both
+as `"correct": true` next to `"Hit the 12-step limit without a final answer."`
+
+**Fixed 2026-09-19.** Final-answer selection is now explicit rather than
+retroactive. A run scores only if the model *finished*: stopped of its own
+accord and presented an answer. Hitting the step limit or dying on a provider
+error yields no answer at all — the query it had reached is kept as
+`abandoned_sql` for triage and is never graded. The closing message also gets
+the last word: a model that signs off with a different fenced query than the one
+it ran is scored on the query it names, which closes the third shape the review
+demonstrated (answering `SELECT 999` after an earlier correct count of 40). The
+rule is stated in [`agent.py`](harness/agent.py) and restated at the grading
+site in [`eval/run.py`](eval/run.py), because that is where a reader looks for it.
+
+Six regression tests in [`tests/test_agent_loop.py`](tests/test_agent_loop.py)
+pin all three shapes and the three cases the fix must *not* break: prose merely
+mentioning "select" does not overwrite a query that worked, a typo in a restated
+query falls back to the result the model actually got, and a model that answers
+in prose without ever calling the tool is still scored on the SQL in its reply.
+
+Reproduced against the real model, not only the scripted one. Q02 under
+`AGENT_MAX_STEPS=3` runs the gold-matching query, never answers, and is now
+graded FAIL — where the old rule scored the identical run a PASS:
+
+```powershell
+$env:AGENT_MAX_STEPS='3'
+.venv\Scripts\python eval\run.py --arm harness --only Q02 --tag falsepass-demo
+```
+
+Re-measured afterwards on the same model, database and question set:
+
+| Arm | Knowledge | Before (score / clean) | After the fix |
+|---|---|---|---|
+| harness | curated | 27/31 / 27 | **27/31** |
+| harness | discovered | 23/31 / 21, then 22/31 / 22 | **22/31** |
+
+The curated arm is unchanged down to the individual question — the same four
+(Q05, Q07, Q10, Q14) fail before and after — so the fix costs a run that behaves
+itself nothing. The two columns now collapse into one by construction: a score
+*is* a clean score, and `clean` stops being something a reader has to be told
+about separately.
 
 ### Human review is an interface, deliberately
 
@@ -525,21 +567,24 @@ Worth continuing, with the claim stated narrowly: **a generic defect taxonomy
 plus mechanical verification recovers a minority — not a majority — of
 hand-written schema knowledge, and recovers none of the knowledge that is not in
 the data.** The honest next steps are stability across repeated audits, stronger
-proof requirements (a contrast, not just a count), a stronger model for the
-audit phase than for the answering phase, and fixing the false-pass path before
-any of these numbers are quoted again.
+proof requirements (a contrast, not just a count), and a stronger model for the
+audit phase than for the answering phase. The false-pass path was the fourth
+item on that list and is now closed, so the numbers above are quotable as they
+stand — with the discovered arm read at its clean value.
 
 ---
 
 ## Status
 
-**Verified — 175 tests passing, plus a 31/31 eval dry run:**
+**Verified — 198 tests passing (7 skipped), plus a 31/31 eval dry run:**
 - 10-table schema, deterministic generator, all 10 defects asserted present in a live DB
 - Read-only enforcement verified at the MySQL grant layer (`DROP` denied)
 - Join inference, profiling, schema card, glossary retrieval
 - 31 gold questions, every one executed; every `naive_sql` confirmed to produce a *different* answer
 - Full agent loop — tool dispatch, message threading, error repair, step limits, grading —
   verified against a **scripted model**, so it runs with no API key, GPU or network
+- Final-answer selection: a step limit, a provider error, and a closing message
+  that names a different query than the one that ran all fail to score
 - Discovery: the verification contract's anti-gaming rejections, question-blindness,
   artifact round-trip, and that each of the four curated-knowledge channels is
   actually dark under `HARNESS_KNOWLEDGE=discovered`
