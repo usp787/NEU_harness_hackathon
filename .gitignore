@@ -50,6 +50,17 @@ eval/out/milk_tea/*
 !eval/out/milk_tea/milk-tea-20260919-report.md
 !eval/out/milk_tea/milk-tea-20260919.log
 
+# Same shape for the mixed five-industry dataset: unignore the directory, then
+# re-ignore its contents and keep only the committed evaluation.
+!eval/out/mixed/
+eval/out/mixed/*
+!eval/out/mixed/baseline-local-mixed-20260919.json
+!eval/out/mixed/harness-local-mixed-20260919.json
+!eval/out/mixed/dry-gold-mixed-20260919.json
+!eval/out/mixed/mixed-20260919-metadata.json
+!eval/out/mixed/mixed-20260919-report.md
+!eval/out/mixed/mixed-20260919.log
+
 .DS_Store
 Thumbs.db
 .idea/

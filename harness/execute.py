@@ -57,7 +57,10 @@ def _defect_notes(lowered: str) -> list[str]:
     if memory.curated_hints_enabled() and dataset.name() == "milk_tea":
         from .milk_tea import notes_for_sql
         notes.extend(notes_for_sql(lowered))
-    elif memory.curated_hints_enabled():
+    elif memory.curated_hints_enabled() and dataset.name() == "saas":
+        # _DIRTY_COLUMNS and the cust_id rule below name saas columns. Firing
+        # them on another dataset would volunteer confident nonsense about
+        # tables it does not have.
         for col, why in _DIRTY_COLUMNS.items():
             if col in lowered:
                 notes.append(f"Query touches `{col}`: {why}.")

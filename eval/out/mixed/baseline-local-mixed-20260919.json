@@ -1,0 +1,837 @@
+{
+  "arm": "baseline",
+  "provider": "local",
+  "dataset": "mixed",
+  "questions": {
+    "path": "mixed/questions.yaml",
+    "sha256": "6bb2320091ec0444b5edbdbb673d56111b01948c037579000ef46605ff0b9793"
+  },
+  "knowledge": "curated",
+  "summary": {
+    "total": 30,
+    "correct": 18,
+    "accuracy": 0.6,
+    "context_overflow": 0,
+    "graded": 30,
+    "accuracy_graded": 0.6,
+    "by_defect": {
+      "D1": {
+        "n": 3,
+        "correct": 3
+      },
+      "D4": {
+        "n": 3,
+        "correct": 3
+      },
+      "D5": {
+        "n": 3,
+        "correct": 1
+      },
+      "D7": {
+        "n": 2,
+        "correct": 0
+      },
+      "D10": {
+        "n": 3,
+        "correct": 0
+      },
+      "D2": {
+        "n": 2,
+        "correct": 2
+      },
+      "D3": {
+        "n": 2,
+        "correct": 0
+      },
+      "D6": {
+        "n": 2,
+        "correct": 1
+      },
+      "D8": {
+        "n": 3,
+        "correct": 2
+      },
+      "D9": {
+        "n": 2,
+        "correct": 1
+      },
+      "control": {
+        "n": 5,
+        "correct": 5
+      }
+    },
+    "elapsed_s": 33.6
+  },
+  "records": [
+    {
+      "id": "Q01",
+      "arm": "baseline",
+      "question": "\u3010\u533b\u7597\u30112023 \u5e74 12 \u6708\u6709\u591a\u5c11\u4f4d\u4e0d\u540c\u7684\u60a3\u8005\u88ab\u5f00\u8fc7\u5904\u65b9\uff1f",
+      "defect_ids": [
+        "D1"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 1,
+      "tool_calls": [],
+      "final_sql": "SELECT COUNT(DISTINCT pat_id) AS distinct_patients\nFROM med_prescriptions\nWHERE start_time >= '2023-12-01 00:00:00'\n  AND start_time < '2024-01-01 00:00:00'",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": null,
+      "elapsed_s": 4.52,
+      "usage": {
+        "completion_tokens": 76,
+        "prompt_tokens": 3418,
+        "total_tokens": 3494,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    },
+    {
+      "id": "Q02",
+      "arm": "baseline",
+      "question": "\u3010\u533b\u7597\u3011\u76ee\u524d\u4ecd\u5728\u4f4f\u9662\u7684\u60a3\u8005\u6709\u591a\u5c11\uff1f",
+      "defect_ids": [
+        "D4"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 1,
+      "tool_calls": [],
+      "final_sql": "SELECT COUNT(*) AS in_hospital_count\nFROM med_admissions\nWHERE status = 'ADMITTED'",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": null,
+      "elapsed_s": 0.85,
+      "usage": {
+        "completion_tokens": 27,
+        "prompt_tokens": 3404,
+        "total_tokens": 3431,
+        "prompt_tokens_details": {
+          "cached_tokens": 3383
+        }
+      }
+    },
+    {
+      "id": "Q03",
+      "arm": "baseline",
+      "question": "\u3010\u533b\u7597\u3011\u8840\u808c\u9150\uff08Creatinine\uff09\u7684\u5e73\u5747\u503c\u662f\u591a\u5c11\uff1f",
+      "defect_ids": [
+        "D5"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 1,
+      "tool_calls": [],
+      "final_sql": "SELECT AVG(le.valuenum) AS avg_creatinine\nFROM med_lab_events le\nJOIN med_lab_items lmi ON le.itemid = lmi.itemid\nWHERE lmi.label = 'Creatinine'",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": null,
+      "elapsed_s": 1.46,
+      "usage": {
+        "completion_tokens": 50,
+        "prompt_tokens": 3410,
+        "total_tokens": 3460,
+        "prompt_tokens_details": {
+          "cached_tokens": 3383
+        }
+      }
+    },
+    {
+      "id": "Q04",
+      "arm": "baseline",
+      "question": "\u3010\u533b\u7597\u30112023-12-12\uff08\u672c\u5730\u65e5\u671f\uff09\u5f53\u5929\u5b8c\u6210\u4e86\u591a\u5c11\u9879\u5316\u9a8c\uff1f",
+      "defect_ids": [
+        "D7"
+      ],
+      "correct": false,
+      "answered": true,
+      "steps": 1,
+      "tool_calls": [],
+      "final_sql": "SELECT COUNT(*) AS total_lab_events\nFROM med_lab_events\nWHERE DATE(charttime) = '2023-12-12'",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": "gold=(56.0,) cand=(48.0,)",
+      "elapsed_s": 1.11,
+      "usage": {
+        "completion_tokens": 37,
+        "prompt_tokens": 3418,
+        "total_tokens": 3455,
+        "prompt_tokens_details": {
+          "cached_tokens": 3383
+        }
+      }
+    },
+    {
+      "id": "Q05",
+      "arm": "baseline",
+      "question": "\u3010\u533b\u7597\u3011\u8840\u7cd6\uff08Glucose\uff09\u5e73\u5747\u503c\u662f\u591a\u5c11\uff08\u7edf\u4e00\u4e3a mg/dL\uff09\uff1f",
+      "defect_ids": [
+        "D10"
+      ],
+      "correct": false,
+      "answered": true,
+      "steps": 1,
+      "tool_calls": [],
+      "final_sql": "SELECT AVG(le.valuenum) AS avg_glucose_mg_dl\nFROM med_lab_events le\nJOIN med_lab_items lmi ON le.itemid = lmi.itemid\nWHERE lmi.label = 'Glucose'",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": "gold=(164.4301,) cand=(138.8585,)",
+      "elapsed_s": 1.52,
+      "usage": {
+        "completion_tokens": 52,
+        "prompt_tokens": 3413,
+        "total_tokens": 3465,
+        "prompt_tokens_details": {
+          "cached_tokens": 3383
+        }
+      }
+    },
+    {
+      "id": "Q06",
+      "arm": "baseline",
+      "question": "\u3010\u6cd5\u5f8b\u3011\u5df2\u7ed3\u6848\uff08CLOSED\uff09\u7684\u6848\u4ef6\u6709\u591a\u5c11\u4ef6\uff1f",
+      "defect_ids": [
+        "D2"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 1,
+      "tool_calls": [],
+      "final_sql": "SELECT COUNT(*) AS closed_case_count\nFROM leg_cases\nWHERE status = 'CLOSED'",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": null,
+      "elapsed_s": 0.81,
+      "usage": {
+        "completion_tokens": 25,
+        "prompt_tokens": 3408,
+        "total_tokens": 3433,
+        "prompt_tokens_details": {
+          "cached_tokens": 3383
+        }
+      }
+    },
+    {
+      "id": "Q07",
+      "arm": "baseline",
+      "question": "\u3010\u6cd5\u5f8b\u3011docket \u6587\u4ef6\u6570\u6700\u591a\u7684\u524d 5 \u4e2a\u6848\u4ef6\u662f\u54ea\u4e9b\uff1f\uff08\u53ea\u7edf\u8ba1\u786e\u5b9e\u5b58\u5728\u7684\u6848\u4ef6\uff1b\u540c\u6570\u6309\u6848\u4ef6\u53f7\u5347\u5e8f\uff09",
+      "defect_ids": [
+        "D3"
+      ],
+      "correct": false,
+      "answered": false,
+      "steps": 1,
+      "tool_calls": [],
+      "final_sql": "SELECT \n    c.case_id,\n    c.case_no,\n    c.case_type,\n    c.filed_date,\n    c.closed_date,\n    c.status,\n    c.disposition_code,\n    c.award_amount,\n    c.num_filings\nFROM leg_cases c\nWHERE c.status IN ('OPEN', 'CLOSED', 'APPEALED')\nORDER BY c.num_filings DESC, c.case_no ASC\nLIMIT 5",
+      "abandoned_sql": null,
+      "error": "MySQL error 1054: Unknown column 'c.case_no' in 'field list'",
+      "error_kind": null,
+      "mismatch": "candidate returned 0 rows; gold has 5",
+      "elapsed_s": 2.86,
+      "usage": {
+        "completion_tokens": 104,
+        "prompt_tokens": 3428,
+        "total_tokens": 3532,
+        "prompt_tokens_details": {
+          "cached_tokens": 3383
+        }
+      }
+    },
+    {
+      "id": "Q08",
+      "arm": "baseline",
+      "question": "\u3010\u6cd5\u5f8b\u3011\u7cfb\u7edf\u91cc\u4e00\u5171\u6709\u591a\u5c11\u5bb6\u4e0d\u540c\u7684\u516c\u53f8\u5f53\u4e8b\u4eba\uff1f",
+      "defect_ids": [
+        "D6"
+      ],
+      "correct": false,
+      "answered": true,
+      "steps": 1,
+      "tool_calls": [],
+      "final_sql": "SELECT COUNT(DISTINCT party_id) AS company_count\nFROM leg_parties\nWHERE party_type = 'corporation'",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": "gold=(57.0,) cand=(65.0,)",
+      "elapsed_s": 0.97,
+      "usage": {
+        "completion_tokens": 31,
+        "prompt_tokens": 3407,
+        "total_tokens": 3438,
+        "prompt_tokens_details": {
+          "cached_tokens": 3383
+        }
+      }
+    },
+    {
+      "id": "Q09",
+      "arm": "baseline",
+      "question": "\u3010\u6cd5\u5f8b\u3011\u6709\u591a\u5c11\u6761 docket \u8bb0\u5f55\u627e\u4e0d\u5230\u5bf9\u5e94\u7684\u6848\u4ef6\uff1f",
+      "defect_ids": [
+        "D8"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 1,
+      "tool_calls": [],
+      "final_sql": "SELECT COUNT(*) AS count\nFROM leg_docket_entries d\nLEFT JOIN leg_cases c ON d.case_no = c.case_id\nWHERE c.case_id IS NULL",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": null,
+      "elapsed_s": 1.21,
+      "usage": {
+        "completion_tokens": 40,
+        "prompt_tokens": 3408,
+        "total_tokens": 3448,
+        "prompt_tokens_details": {
+          "cached_tokens": 3383
+        }
+      }
+    },
+    {
+      "id": "Q10",
+      "arm": "baseline",
+      "question": "\u3010\u6cd5\u5f8b\u3011\u6309\u7ed3\u6848\u4ee3\u7801\uff08disposition_code\uff09\u7edf\u8ba1\u5404\u4ee3\u7801\u7684\u6848\u4ef6\u6570\uff08\u4e0d\u542b\u672a\u7ed3\u6848\uff09\u3002",
+      "defect_ids": [
+        "D9"
+      ],
+      "correct": false,
+      "answered": true,
+      "steps": 1,
+      "tool_calls": [],
+      "final_sql": "SELECT disposition_code, COUNT(*) AS case_count\nFROM leg_cases\nWHERE status = 'CLOSED' AND disposition_code IS NOT NULL\nGROUP BY disposition_code",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": "gold=(1.0, 29.0) cand=(1.0, 27.0); gold=(12.0, 2.0) cand=(2.0, 7.0); gold=(2.0, 7.0) cand=(2.0, 8.0)",
+      "elapsed_s": 1.17,
+      "usage": {
+        "completion_tokens": 39,
+        "prompt_tokens": 3416,
+        "total_tokens": 3455,
+        "prompt_tokens_details": {
+          "cached_tokens": 3383
+        }
+      }
+    },
+    {
+      "id": "Q11",
+      "arm": "baseline",
+      "question": "\u3010\u7535\u5546\u3011\u6709\u591a\u5c11\u4e2a\u8ba2\u5355\u5df2\u7ecf\u6709\u53d1\u8d27\u8bb0\u5f55\uff1f",
+      "defect_ids": [
+        "D1"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 1,
+      "tool_calls": [],
+      "final_sql": "SELECT COUNT(DISTINCT o.order_id) AS order_count\nFROM ecom_orders o\nJOIN ecom_shipments s ON o.order_id = s.order_ref\nWHERE o.status != 'CANCELLED'",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": null,
+      "elapsed_s": 1.4,
+      "usage": {
+        "completion_tokens": 48,
+        "prompt_tokens": 3405,
+        "total_tokens": 3453,
+        "prompt_tokens_details": {
+          "cached_tokens": 3383
+        }
+      }
+    },
+    {
+      "id": "Q12",
+      "arm": "baseline",
+      "question": "\u3010\u7535\u5546\u3011\u76ee\u524d\u4ecd\u5728\u8fd0\u8f93\u4e2d\uff08\u672a\u9001\u8fbe\u4e14\u672a\u4e22\u5931\uff09\u7684\u5305\u88f9\u6709\u591a\u5c11\u4e2a\uff1f",
+      "defect_ids": [
+        "D4"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 1,
+      "tool_calls": [],
+      "final_sql": "SELECT COUNT(*) AS in_transit_count\nFROM ecom_shipments\nWHERE status = 'IN_TRANSIT'",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": null,
+      "elapsed_s": 0.91,
+      "usage": {
+        "completion_tokens": 29,
+        "prompt_tokens": 3414,
+        "total_tokens": 3443,
+        "prompt_tokens_details": {
+          "cached_tokens": 3383
+        }
+      }
+    },
+    {
+      "id": "Q13",
+      "arm": "baseline",
+      "question": "\u3010\u7535\u5546\u3011\u6700\u91cd\u7684\u5546\u54c1\u91cd\u91cf\u662f\u591a\u5c11\u5343\u514b\uff1f",
+      "defect_ids": [
+        "D5"
+      ],
+      "correct": false,
+      "answered": true,
+      "steps": 1,
+      "tool_calls": [],
+      "final_sql": "SELECT MAX(weight_kg) AS max_weight_kg\nFROM ecom_products",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": "gold=(13.8,) cand=('varies',)",
+      "elapsed_s": 0.83,
+      "usage": {
+        "completion_tokens": 23,
+        "prompt_tokens": 3405,
+        "total_tokens": 3428,
+        "prompt_tokens_details": {
+          "cached_tokens": 3383
+        }
+      }
+    },
+    {
+      "id": "Q14",
+      "arm": "baseline",
+      "question": "\u3010\u7535\u5546\u3011\u6709\u591a\u5c11\u4e2a\u8ba2\u5355\u627e\u4e0d\u5230\u5bf9\u5e94\u7684\u5ba2\u6237\uff1f",
+      "defect_ids": [
+        "D8"
+      ],
+      "correct": false,
+      "answered": true,
+      "steps": 1,
+      "tool_calls": [],
+      "final_sql": "SELECT COUNT(*) AS order_count_without_customer\nFROM ecom_orders\nWHERE customer_id IS NULL",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": "gold=(37.0,) cand=(0.0,)",
+      "elapsed_s": 0.84,
+      "usage": {
+        "completion_tokens": 26,
+        "prompt_tokens": 3405,
+        "total_tokens": 3431,
+        "prompt_tokens_details": {
+          "cached_tokens": 3383
+        }
+      }
+    },
+    {
+      "id": "Q15",
+      "arm": "baseline",
+      "question": "\u3010\u7535\u5546\u3011\u5df2\u6263\u6b3e\uff08captured\uff09\u652f\u4ed8\u7684\u603b\u91d1\u989d\u662f\u591a\u5c11\u7f8e\u5143\uff1f",
+      "defect_ids": [
+        "D10"
+      ],
+      "correct": false,
+      "answered": true,
+      "steps": 1,
+      "tool_calls": [],
+      "final_sql": "SELECT SUM(p.amount) AS total_captured_amount\nFROM ecom_payments p\nWHERE p.status = 'captured'",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": "gold=(430311.6,) cand=(12190420.0,)",
+      "elapsed_s": 0.91,
+      "usage": {
+        "completion_tokens": 31,
+        "prompt_tokens": 3410,
+        "total_tokens": 3441,
+        "prompt_tokens_details": {
+          "cached_tokens": 3383
+        }
+      }
+    },
+    {
+      "id": "Q16",
+      "arm": "baseline",
+      "question": "\u3010\u77ed\u89c6\u9891\u3011\u751f\u6548\u4e2d\uff08active\uff09\u7684\u63a8\u5e7f\u6709\u591a\u5c11\u4e2a\uff1f",
+      "defect_ids": [
+        "D2"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 1,
+      "tool_calls": [],
+      "final_sql": "SELECT COUNT(*) AS active_promotion_count\nFROM tt_promotions\nWHERE status = 'active'",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": null,
+      "elapsed_s": 0.81,
+      "usage": {
+        "completion_tokens": 26,
+        "prompt_tokens": 3408,
+        "total_tokens": 3434,
+        "prompt_tokens_details": {
+          "cached_tokens": 3383
+        }
+      }
+    },
+    {
+      "id": "Q17",
+      "arm": "baseline",
+      "question": "\u3010\u77ed\u89c6\u9891\u3011\u5b9e\u9645\u70b9\u8d5e\u6570\u6700\u591a\u7684\u524d 10 \u4e2a\u89c6\u9891\u662f\u54ea\u4e9b\uff1f\uff08\u53ea\u7edf\u8ba1\u73b0\u5b58\u89c6\u9891\uff1b\u540c\u6570\u6309\u89c6\u9891 ID \u5347\u5e8f\uff09",
+      "defect_ids": [
+        "D3"
+      ],
+      "correct": false,
+      "answered": true,
+      "steps": 1,
+      "tool_calls": [],
+      "final_sql": "SELECT video_id, like_count\nFROM tt_videos\nWHERE status = 'PUBLISHED'\nORDER BY like_count DESC, video_id ASC\nLIMIT 10",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": "gold=(5000011.0,) cand=(17.0, 5000050.0); gold=(5000023.0,) cand=(17.0, 5000316.0); gold=(5000031.0,) cand=(18.0, 5000058.0)",
+      "elapsed_s": 1.19,
+      "usage": {
+        "completion_tokens": 41,
+        "prompt_tokens": 3427,
+        "total_tokens": 3468,
+        "prompt_tokens_details": {
+          "cached_tokens": 3383
+        }
+      }
+    },
+    {
+      "id": "Q18",
+      "arm": "baseline",
+      "question": "\u3010\u77ed\u89c6\u9891\u3011\u4e00\u5171\u6709\u591a\u5c11\u4f4d\u4e0d\u540c\u7684\u771f\u4eba\u7528\u6237\uff1f\uff08\u540c\u4e00 device_id \u89c6\u4e3a\u540c\u4e00\u4eba\uff09",
+      "defect_ids": [
+        "D6"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 1,
+      "tool_calls": [],
+      "final_sql": "SELECT COUNT(DISTINCT device_id) AS unique_users\nFROM tt_users",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": null,
+      "elapsed_s": 0.69,
+      "usage": {
+        "completion_tokens": 22,
+        "prompt_tokens": 3414,
+        "total_tokens": 3436,
+        "prompt_tokens_details": {
+          "cached_tokens": 3383
+        }
+      }
+    },
+    {
+      "id": "Q19",
+      "arm": "baseline",
+      "question": "\u3010\u77ed\u89c6\u9891\u3011\u6309\u4e3e\u62a5\u539f\u56e0\u4ee3\u7801\uff08reason_code\uff09\u7edf\u8ba1\u5404\u4ee3\u7801\u7684\u4e3e\u62a5\u6570\u3002",
+      "defect_ids": [
+        "D9"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 1,
+      "tool_calls": [],
+      "final_sql": "SELECT reason_code, COUNT(*) AS report_count\nFROM tt_reports\nGROUP BY reason_code",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": null,
+      "elapsed_s": 0.76,
+      "usage": {
+        "completion_tokens": 25,
+        "prompt_tokens": 3413,
+        "total_tokens": 3438,
+        "prompt_tokens_details": {
+          "cached_tokens": 3383
+        }
+      }
+    },
+    {
+      "id": "Q20",
+      "arm": "baseline",
+      "question": "\u3010\u77ed\u89c6\u9891\u3011\u5e73\u5747\u6bcf\u4e2a\u63a8\u5e7f\u7684\u9884\u7b97\u662f\u591a\u5c11\u7f8e\u5143\uff1f",
+      "defect_ids": [
+        "D10"
+      ],
+      "correct": false,
+      "answered": true,
+      "steps": 1,
+      "tool_calls": [],
+      "final_sql": "SELECT AVG(budget) AS avg_budget\nFROM tt_promotions",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": "gold=(1247.693,) cand=(45936.29,)",
+      "elapsed_s": 0.62,
+      "usage": {
+        "completion_tokens": 20,
+        "prompt_tokens": 3406,
+        "total_tokens": 3426,
+        "prompt_tokens_details": {
+          "cached_tokens": 3383
+        }
+      }
+    },
+    {
+      "id": "Q21",
+      "arm": "baseline",
+      "question": "\u3010\u5730\u56fe\u3011\u6709\u591a\u5c11\u4e2a\u4e0d\u540c\u7684\u5730\u70b9\u88ab\u7528\u6237\u4e3e\u62a5\u8fc7\uff1f",
+      "defect_ids": [
+        "D1"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 1,
+      "tool_calls": [],
+      "final_sql": "SELECT COUNT(DISTINCT listing_id) AS flagged_places_count\nFROM map_flags",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": null,
+      "elapsed_s": 0.72,
+      "usage": {
+        "completion_tokens": 23,
+        "prompt_tokens": 3407,
+        "total_tokens": 3430,
+        "prompt_tokens_details": {
+          "cached_tokens": 3383
+        }
+      }
+    },
+    {
+      "id": "Q22",
+      "arm": "baseline",
+      "question": "\u3010\u5730\u56fe\u3011\u76ee\u524d\u6b63\u5e38\u8425\u4e1a\uff08OPEN\uff09\u7684\u5730\u70b9\u6709\u591a\u5c11\u4e2a\uff1f",
+      "defect_ids": [
+        "D4"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 1,
+      "tool_calls": [],
+      "final_sql": "SELECT COUNT(*) AS open_place_count\nFROM map_places\nWHERE status = 'OPEN'",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": null,
+      "elapsed_s": 0.8,
+      "usage": {
+        "completion_tokens": 24,
+        "prompt_tokens": 3409,
+        "total_tokens": 3433,
+        "prompt_tokens_details": {
+          "cached_tokens": 3383
+        }
+      }
+    },
+    {
+      "id": "Q23",
+      "arm": "baseline",
+      "question": "\u3010\u5730\u56fe\u3011\u6240\u6709\u8bc4\u4ef7\u7684\u5e73\u5747\u8bc4\u5206\u662f\u591a\u5c11\uff1f",
+      "defect_ids": [
+        "D5"
+      ],
+      "correct": false,
+      "answered": true,
+      "steps": 1,
+      "tool_calls": [],
+      "final_sql": "SELECT AVG(CAST(rating AS DECIMAL(3,2))) AS avg_rating\nFROM map_reviews\nWHERE rating IS NOT NULL",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": "gold=(3.872067,) cand=(3.712667,)",
+      "elapsed_s": 1.02,
+      "usage": {
+        "completion_tokens": 34,
+        "prompt_tokens": 3404,
+        "total_tokens": 3438,
+        "prompt_tokens_details": {
+          "cached_tokens": 3383
+        }
+      }
+    },
+    {
+      "id": "Q24",
+      "arm": "baseline",
+      "question": "\u3010\u5730\u56fe\u30112024-12-29\uff08\u672c\u5730\u65e5\u671f\uff09\u5f53\u5929\u6709\u591a\u5c11\u6761\u8bc4\u4ef7\uff1f",
+      "defect_ids": [
+        "D7"
+      ],
+      "correct": false,
+      "answered": true,
+      "steps": 1,
+      "tool_calls": [],
+      "final_sql": "SELECT COUNT(*) AS review_count\nFROM map_reviews\nWHERE DATE(created_at) = '2024-12-29'",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": "gold=(41.0,) cand=(52.0,)",
+      "elapsed_s": 1.06,
+      "usage": {
+        "completion_tokens": 35,
+        "prompt_tokens": 3416,
+        "total_tokens": 3451,
+        "prompt_tokens_details": {
+          "cached_tokens": 3383
+        }
+      }
+    },
+    {
+      "id": "Q25",
+      "arm": "baseline",
+      "question": "\u3010\u5730\u56fe\u3011\u6709\u591a\u5c11\u6761\u8bc4\u4ef7\u627e\u4e0d\u5230\u5bf9\u5e94\u7684\u5730\u70b9\uff1f",
+      "defect_ids": [
+        "D8"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 1,
+      "tool_calls": [],
+      "final_sql": "SELECT COUNT(*) AS count\nFROM map_reviews mr\nLEFT JOIN map_places mp ON mr.place_ref = mp.place_id\nWHERE mp.place_id IS NULL",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": null,
+      "elapsed_s": 1.15,
+      "usage": {
+        "completion_tokens": 38,
+        "prompt_tokens": 3404,
+        "total_tokens": 3442,
+        "prompt_tokens_details": {
+          "cached_tokens": 3383
+        }
+      }
+    },
+    {
+      "id": "C01",
+      "arm": "baseline",
+      "question": "\u3010\u533b\u7597\u3011\u4e00\u5171\u6709\u591a\u5c11\u4e2a\u79d1\u5ba4\uff1f",
+      "defect_ids": [],
+      "correct": true,
+      "answered": true,
+      "steps": 1,
+      "tool_calls": [],
+      "final_sql": "SELECT COUNT(*) AS total_departments FROM med_departments",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": null,
+      "elapsed_s": 0.62,
+      "usage": {
+        "completion_tokens": 18,
+        "prompt_tokens": 3402,
+        "total_tokens": 3420,
+        "prompt_tokens_details": {
+          "cached_tokens": 3383
+        }
+      }
+    },
+    {
+      "id": "C02",
+      "arm": "baseline",
+      "question": "\u3010\u6cd5\u5f8b\u3011\u52b3\u52a8\u4e89\u8bae\uff08employment\uff09\u7c7b\u578b\u7684\u6848\u4ef6\u6709\u591a\u5c11\u4ef6\uff1f",
+      "defect_ids": [],
+      "correct": true,
+      "answered": true,
+      "steps": 1,
+      "tool_calls": [],
+      "final_sql": "SELECT COUNT(*) AS employment_case_count\nFROM leg_cases\nWHERE case_type = 'employment'",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": null,
+      "elapsed_s": 0.81,
+      "usage": {
+        "completion_tokens": 25,
+        "prompt_tokens": 3407,
+        "total_tokens": 3432,
+        "prompt_tokens_details": {
+          "cached_tokens": 3383
+        }
+      }
+    },
+    {
+      "id": "C03",
+      "arm": "baseline",
+      "question": "\u3010\u7535\u5546\u3011\u4e00\u5171\u6709\u591a\u5c11\u4e2a\u4ed3\u5e93\uff1f",
+      "defect_ids": [],
+      "correct": true,
+      "answered": true,
+      "steps": 1,
+      "tool_calls": [],
+      "final_sql": "SELECT COUNT(*) AS warehouse_count FROM `ecom_warehouses`",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": null,
+      "elapsed_s": 0.66,
+      "usage": {
+        "completion_tokens": 19,
+        "prompt_tokens": 3402,
+        "total_tokens": 3421,
+        "prompt_tokens_details": {
+          "cached_tokens": 3383
+        }
+      }
+    },
+    {
+      "id": "C04",
+      "arm": "baseline",
+      "question": "\u3010\u77ed\u89c6\u9891\u3011\u4e00\u5171\u6709\u591a\u5c11\u4f4d\u521b\u4f5c\u8005\uff1f",
+      "defect_ids": [],
+      "correct": true,
+      "answered": true,
+      "steps": 1,
+      "tool_calls": [],
+      "final_sql": "SELECT COUNT(*) AS total_creators\nFROM tt_creators",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": null,
+      "elapsed_s": 0.63,
+      "usage": {
+        "completion_tokens": 19,
+        "prompt_tokens": 3403,
+        "total_tokens": 3422,
+        "prompt_tokens_details": {
+          "cached_tokens": 3383
+        }
+      }
+    },
+    {
+      "id": "C05",
+      "arm": "baseline",
+      "question": "\u3010\u5730\u56fe\u3011\u4e00\u5171\u6709\u591a\u5c11\u4f4d\u5546\u5bb6\uff08owners\uff09\uff1f",
+      "defect_ids": [],
+      "correct": true,
+      "answered": true,
+      "steps": 1,
+      "tool_calls": [],
+      "final_sql": "SELECT COUNT(*) AS owner_count\nFROM map_owners",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": null,
+      "elapsed_s": 0.64,
+      "usage": {
+        "completion_tokens": 18,
+        "prompt_tokens": 3406,
+        "total_tokens": 3424,
+        "prompt_tokens_details": {
+          "cached_tokens": 3383
+        }
+      }
+    }
+  ]
+}

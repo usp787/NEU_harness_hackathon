@@ -282,10 +282,18 @@ def active_glossary() -> list[Term]:
     """The terms this run is allowed to see, per HARNESS_KNOWLEDGE."""
     from . import memory
     from . import dataset
-    curated = GLOSSARY
+    # Curated terms are written against ONE schema and are worse than useless
+    # anywhere else: handing the mixed dataset the saas glossary would assert
+    # that `plan_tier` is a stale cache in a database that has no such column.
+    # A dataset with no curated terms of its own gets none -- the no-match path
+    # at least tells the model not to assume a convention.
     if dataset.name() == "milk_tea":
         from .milk_tea import terms
         curated = terms()
+    elif dataset.name() == "saas":
+        curated = GLOSSARY
+    else:
+        curated = []
     mode = memory.knowledge_mode()
     if mode == "curated":
         return curated

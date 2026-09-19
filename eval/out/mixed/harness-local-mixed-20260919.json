@@ -1,0 +1,891 @@
+{
+  "arm": "harness",
+  "provider": "local",
+  "dataset": "mixed",
+  "questions": {
+    "path": "mixed/questions.yaml",
+    "sha256": "6bb2320091ec0444b5edbdbb673d56111b01948c037579000ef46605ff0b9793"
+  },
+  "knowledge": "curated",
+  "summary": {
+    "total": 30,
+    "correct": 21,
+    "accuracy": 0.7,
+    "context_overflow": 0,
+    "graded": 30,
+    "accuracy_graded": 0.7,
+    "by_defect": {
+      "D1": {
+        "n": 3,
+        "correct": 2
+      },
+      "D4": {
+        "n": 3,
+        "correct": 3
+      },
+      "D5": {
+        "n": 3,
+        "correct": 3
+      },
+      "D7": {
+        "n": 2,
+        "correct": 0
+      },
+      "D10": {
+        "n": 3,
+        "correct": 0
+      },
+      "D2": {
+        "n": 2,
+        "correct": 2
+      },
+      "D3": {
+        "n": 2,
+        "correct": 0
+      },
+      "D6": {
+        "n": 2,
+        "correct": 1
+      },
+      "D8": {
+        "n": 3,
+        "correct": 3
+      },
+      "D9": {
+        "n": 2,
+        "correct": 2
+      },
+      "control": {
+        "n": 5,
+        "correct": 5
+      }
+    },
+    "elapsed_s": 243.2
+  },
+  "records": [
+    {
+      "id": "Q01",
+      "arm": "harness",
+      "question": "\u3010\u533b\u7597\u30112023 \u5e74 12 \u6708\u6709\u591a\u5c11\u4f4d\u4e0d\u540c\u7684\u60a3\u8005\u88ab\u5f00\u8fc7\u5904\u65b9\uff1f",
+      "defect_ids": [
+        "D1"
+      ],
+      "correct": false,
+      "answered": true,
+      "steps": 6,
+      "tool_calls": [
+        "resolve_term",
+        "profile_column",
+        "profile_column",
+        "profile_column",
+        "execute_sql",
+        "execute_sql",
+        "execute_sql"
+      ],
+      "final_sql": "SELECT COUNT(DISTINCT a.subject_id) AS patient_count FROM med_prescriptions AS m JOIN med_admissions AS a ON m.hadm_id = a.hadm_id WHERE m.start_time >= '2023-12-01 00:00:00' AND m.start_time < '2024-01-01 00:00:00' LIMIT 200",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": "gold=(80.0,) cand=(78.0,)",
+      "elapsed_s": 33.52,
+      "usage": {
+        "completion_tokens": 872,
+        "prompt_tokens": 49465,
+        "total_tokens": 50337
+      }
+    },
+    {
+      "id": "Q02",
+      "arm": "harness",
+      "question": "\u3010\u533b\u7597\u3011\u76ee\u524d\u4ecd\u5728\u4f4f\u9662\u7684\u60a3\u8005\u6709\u591a\u5c11\uff1f",
+      "defect_ids": [
+        "D4"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 5,
+      "tool_calls": [
+        "resolve_term",
+        "profile_column",
+        "profile_column",
+        "execute_sql"
+      ],
+      "final_sql": "SELECT COUNT(*) AS patient_count FROM med_admissions WHERE status = 'ADMITTED' LIMIT 200",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": null,
+      "elapsed_s": 5.81,
+      "usage": {
+        "completion_tokens": 187,
+        "prompt_tokens": 38838,
+        "total_tokens": 39025
+      }
+    },
+    {
+      "id": "Q03",
+      "arm": "harness",
+      "question": "\u3010\u533b\u7597\u3011\u8840\u808c\u9150\uff08Creatinine\uff09\u7684\u5e73\u5747\u503c\u662f\u591a\u5c11\uff1f",
+      "defect_ids": [
+        "D5"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 6,
+      "tool_calls": [
+        "resolve_term",
+        "profile_column",
+        "profile_column",
+        "profile_column",
+        "execute_sql"
+      ],
+      "final_sql": "SELECT AVG(e.valuenum) AS avg_creatinine FROM med_lab_events AS e JOIN med_lab_items AS i ON e.itemid = i.itemid WHERE i.label = 'Creatinine' LIMIT 200",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": null,
+      "elapsed_s": 7.65,
+      "usage": {
+        "completion_tokens": 247,
+        "prompt_tokens": 47579,
+        "total_tokens": 47826
+      }
+    },
+    {
+      "id": "Q04",
+      "arm": "harness",
+      "question": "\u3010\u533b\u7597\u30112023-12-12\uff08\u672c\u5730\u65e5\u671f\uff09\u5f53\u5929\u5b8c\u6210\u4e86\u591a\u5c11\u9879\u5316\u9a8c\uff1f",
+      "defect_ids": [
+        "D7"
+      ],
+      "correct": false,
+      "answered": true,
+      "steps": 5,
+      "tool_calls": [
+        "resolve_term",
+        "profile_column",
+        "profile_column",
+        "execute_sql"
+      ],
+      "final_sql": "SELECT COUNT(*) AS total_tests FROM med_lab_events WHERE DATE(charttime) = '2023-12-12' LIMIT 200",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": "gold=(56.0,) cand=(48.0,)",
+      "elapsed_s": 6.14,
+      "usage": {
+        "completion_tokens": 193,
+        "prompt_tokens": 39405,
+        "total_tokens": 39598
+      }
+    },
+    {
+      "id": "Q05",
+      "arm": "harness",
+      "question": "\u3010\u533b\u7597\u3011\u8840\u7cd6\uff08Glucose\uff09\u5e73\u5747\u503c\u662f\u591a\u5c11\uff08\u7edf\u4e00\u4e3a mg/dL\uff09\uff1f",
+      "defect_ids": [
+        "D10"
+      ],
+      "correct": false,
+      "answered": true,
+      "steps": 7,
+      "tool_calls": [
+        "resolve_term",
+        "profile_column",
+        "profile_column",
+        "profile_column",
+        "profile_column",
+        "execute_sql",
+        "execute_sql",
+        "execute_sql",
+        "execute_sql"
+      ],
+      "final_sql": "SELECT AVG(valuenum) AS avg_glucose_mg_dL FROM med_lab_events WHERE itemid = 50001 AND uom = 'mg/dL' LIMIT 200",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": "gold=(164.4301,) cand=(164.6263,)",
+      "elapsed_s": 20.6,
+      "usage": {
+        "completion_tokens": 707,
+        "prompt_tokens": 59420,
+        "total_tokens": 60127
+      }
+    },
+    {
+      "id": "Q06",
+      "arm": "harness",
+      "question": "\u3010\u6cd5\u5f8b\u3011\u5df2\u7ed3\u6848\uff08CLOSED\uff09\u7684\u6848\u4ef6\u6709\u591a\u5c11\u4ef6\uff1f",
+      "defect_ids": [
+        "D2"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 4,
+      "tool_calls": [
+        "resolve_term",
+        "profile_column",
+        "execute_sql"
+      ],
+      "final_sql": "SELECT COUNT(*) AS closed_case_count FROM leg_cases WHERE status = 'CLOSED' LIMIT 200",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": null,
+      "elapsed_s": 4.01,
+      "usage": {
+        "completion_tokens": 128,
+        "prompt_tokens": 30702,
+        "total_tokens": 30830
+      }
+    },
+    {
+      "id": "Q07",
+      "arm": "harness",
+      "question": "\u3010\u6cd5\u5f8b\u3011docket \u6587\u4ef6\u6570\u6700\u591a\u7684\u524d 5 \u4e2a\u6848\u4ef6\u662f\u54ea\u4e9b\uff1f\uff08\u53ea\u7edf\u8ba1\u786e\u5b9e\u5b58\u5728\u7684\u6848\u4ef6\uff1b\u540c\u6570\u6309\u6848\u4ef6\u53f7\u5347\u5e8f\uff09",
+      "defect_ids": [
+        "D3"
+      ],
+      "correct": false,
+      "answered": true,
+      "steps": 6,
+      "tool_calls": [
+        "resolve_term",
+        "profile_column",
+        "profile_column",
+        "execute_sql",
+        "execute_sql"
+      ],
+      "final_sql": "SELECT c.case_id, c.case_type, c.status, c.filed_date FROM leg_cases AS c WHERE c.case_id IN (50024, 50064, 50073, 50133, 50177) LIMIT 200",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": "gold=(50024.0,) cand=('2024-11-29', 'CLOSED', 'civil', 50133.0); gold=(50064.0,) cand=('2024-12-11', 'CLOSED', 'contract', 50064.0); gold=(50073.0,) cand=('2024-12-20', 'OPEN', 'personal_injury', 50024.0)",
+      "elapsed_s": 13.6,
+      "usage": {
+        "completion_tokens": 459,
+        "prompt_tokens": 47340,
+        "total_tokens": 47799
+      }
+    },
+    {
+      "id": "Q08",
+      "arm": "harness",
+      "question": "\u3010\u6cd5\u5f8b\u3011\u7cfb\u7edf\u91cc\u4e00\u5171\u6709\u591a\u5c11\u5bb6\u4e0d\u540c\u7684\u516c\u53f8\u5f53\u4e8b\u4eba\uff1f",
+      "defect_ids": [
+        "D6"
+      ],
+      "correct": false,
+      "answered": true,
+      "steps": 4,
+      "tool_calls": [
+        "resolve_term",
+        "profile_column",
+        "execute_sql"
+      ],
+      "final_sql": "SELECT COUNT(DISTINCT party_id) FROM leg_parties WHERE party_type = 'corporation' LIMIT 200",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": "gold=(57.0,) cand=(65.0,)",
+      "elapsed_s": 4.51,
+      "usage": {
+        "completion_tokens": 131,
+        "prompt_tokens": 30678,
+        "total_tokens": 30809
+      }
+    },
+    {
+      "id": "Q09",
+      "arm": "harness",
+      "question": "\u3010\u6cd5\u5f8b\u3011\u6709\u591a\u5c11\u6761 docket \u8bb0\u5f55\u627e\u4e0d\u5230\u5bf9\u5e94\u7684\u6848\u4ef6\uff1f",
+      "defect_ids": [
+        "D8"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 5,
+      "tool_calls": [
+        "resolve_term",
+        "profile_column",
+        "profile_column",
+        "execute_sql"
+      ],
+      "final_sql": "SELECT COUNT(*) AS orphaned_count FROM leg_docket_entries AS d LEFT JOIN leg_cases AS c ON d.case_no = c.case_id WHERE c.case_id IS NULL LIMIT 200",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": null,
+      "elapsed_s": 6.43,
+      "usage": {
+        "completion_tokens": 189,
+        "prompt_tokens": 38851,
+        "total_tokens": 39040
+      }
+    },
+    {
+      "id": "Q10",
+      "arm": "harness",
+      "question": "\u3010\u6cd5\u5f8b\u3011\u6309\u7ed3\u6848\u4ee3\u7801\uff08disposition_code\uff09\u7edf\u8ba1\u5404\u4ee3\u7801\u7684\u6848\u4ef6\u6570\uff08\u4e0d\u542b\u672a\u7ed3\u6848\uff09\u3002",
+      "defect_ids": [
+        "D9"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 5,
+      "tool_calls": [
+        "resolve_term",
+        "profile_column",
+        "profile_column",
+        "execute_sql"
+      ],
+      "final_sql": "SELECT disposition_code, COUNT(*) AS case_count FROM leg_cases WHERE status <> 'OPEN' GROUP BY disposition_code ORDER BY disposition_code LIMIT 200",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": null,
+      "elapsed_s": 13.41,
+      "usage": {
+        "completion_tokens": 436,
+        "prompt_tokens": 39536,
+        "total_tokens": 39972
+      }
+    },
+    {
+      "id": "Q11",
+      "arm": "harness",
+      "question": "\u3010\u7535\u5546\u3011\u6709\u591a\u5c11\u4e2a\u8ba2\u5355\u5df2\u7ecf\u6709\u53d1\u8d27\u8bb0\u5f55\uff1f",
+      "defect_ids": [
+        "D1"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 4,
+      "tool_calls": [
+        "resolve_term",
+        "profile_column",
+        "profile_column",
+        "execute_sql"
+      ],
+      "final_sql": "SELECT COUNT(DISTINCT o.order_id) AS order_count FROM ecom_orders AS o INNER JOIN ecom_shipments AS s ON o.order_id = s.order_ref LIMIT 200",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": null,
+      "elapsed_s": 6.34,
+      "usage": {
+        "completion_tokens": 185,
+        "prompt_tokens": 31032,
+        "total_tokens": 31217
+      }
+    },
+    {
+      "id": "Q12",
+      "arm": "harness",
+      "question": "\u3010\u7535\u5546\u3011\u76ee\u524d\u4ecd\u5728\u8fd0\u8f93\u4e2d\uff08\u672a\u9001\u8fbe\u4e14\u672a\u4e22\u5931\uff09\u7684\u5305\u88f9\u6709\u591a\u5c11\u4e2a\uff1f",
+      "defect_ids": [
+        "D4"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 4,
+      "tool_calls": [
+        "resolve_term",
+        "profile_column",
+        "execute_sql"
+      ],
+      "final_sql": "SELECT COUNT(*) AS count FROM ecom_shipments WHERE status = 'IN_TRANSIT' LIMIT 200",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": null,
+      "elapsed_s": 5.18,
+      "usage": {
+        "completion_tokens": 141,
+        "prompt_tokens": 30744,
+        "total_tokens": 30885
+      }
+    },
+    {
+      "id": "Q13",
+      "arm": "harness",
+      "question": "\u3010\u7535\u5546\u3011\u6700\u91cd\u7684\u5546\u54c1\u91cd\u91cf\u662f\u591a\u5c11\u5343\u514b\uff1f",
+      "defect_ids": [
+        "D5"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 4,
+      "tool_calls": [
+        "resolve_term",
+        "profile_column",
+        "execute_sql"
+      ],
+      "final_sql": "SELECT MAX(CAST(weight_kg AS DECIMAL(10, 2))) AS max_weight_kg FROM ecom_products WHERE REGEXP_LIKE(weight_kg, '^[0-9]+(\\\\.[0-9]+)?$') LIMIT 200",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": null,
+      "elapsed_s": 8.62,
+      "usage": {
+        "completion_tokens": 274,
+        "prompt_tokens": 31191,
+        "total_tokens": 31465
+      }
+    },
+    {
+      "id": "Q14",
+      "arm": "harness",
+      "question": "\u3010\u7535\u5546\u3011\u6709\u591a\u5c11\u4e2a\u8ba2\u5355\u627e\u4e0d\u5230\u5bf9\u5e94\u7684\u5ba2\u6237\uff1f",
+      "defect_ids": [
+        "D8"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 4,
+      "tool_calls": [
+        "resolve_term",
+        "profile_column",
+        "profile_column",
+        "execute_sql"
+      ],
+      "final_sql": "SELECT COUNT(*) AS orphaned_orders FROM ecom_orders AS o LEFT JOIN ecom_customers AS c ON o.customer_id = c.customer_id WHERE c.customer_id IS NULL LIMIT 200",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": null,
+      "elapsed_s": 9.24,
+      "usage": {
+        "completion_tokens": 298,
+        "prompt_tokens": 31116,
+        "total_tokens": 31414
+      }
+    },
+    {
+      "id": "Q15",
+      "arm": "harness",
+      "question": "\u3010\u7535\u5546\u3011\u5df2\u6263\u6b3e\uff08captured\uff09\u652f\u4ed8\u7684\u603b\u91d1\u989d\u662f\u591a\u5c11\u7f8e\u5143\uff1f",
+      "defect_ids": [
+        "D10"
+      ],
+      "correct": false,
+      "answered": true,
+      "steps": 4,
+      "tool_calls": [
+        "resolve_term",
+        "profile_column",
+        "profile_column",
+        "execute_sql"
+      ],
+      "final_sql": "SELECT SUM(amount) AS total_amount FROM ecom_payments WHERE status = 'captured' LIMIT 200",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": "gold=(430311.6,) cand=(12190420.0,)",
+      "elapsed_s": 5.79,
+      "usage": {
+        "completion_tokens": 183,
+        "prompt_tokens": 31066,
+        "total_tokens": 31249
+      }
+    },
+    {
+      "id": "Q16",
+      "arm": "harness",
+      "question": "\u3010\u77ed\u89c6\u9891\u3011\u751f\u6548\u4e2d\uff08active\uff09\u7684\u63a8\u5e7f\u6709\u591a\u5c11\u4e2a\uff1f",
+      "defect_ids": [
+        "D2"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 4,
+      "tool_calls": [
+        "resolve_term",
+        "profile_column",
+        "execute_sql"
+      ],
+      "final_sql": "SELECT COUNT(*) AS active_promotion_count FROM tt_promotions WHERE status = 'active' LIMIT 200",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": null,
+      "elapsed_s": 5.13,
+      "usage": {
+        "completion_tokens": 172,
+        "prompt_tokens": 30728,
+        "total_tokens": 30900
+      }
+    },
+    {
+      "id": "Q17",
+      "arm": "harness",
+      "question": "\u3010\u77ed\u89c6\u9891\u3011\u5b9e\u9645\u70b9\u8d5e\u6570\u6700\u591a\u7684\u524d 10 \u4e2a\u89c6\u9891\u662f\u54ea\u4e9b\uff1f\uff08\u53ea\u7edf\u8ba1\u73b0\u5b58\u89c6\u9891\uff1b\u540c\u6570\u6309\u89c6\u9891 ID \u5347\u5e8f\uff09",
+      "defect_ids": [
+        "D3"
+      ],
+      "correct": false,
+      "answered": true,
+      "steps": 6,
+      "tool_calls": [
+        "resolve_term",
+        "profile_column",
+        "profile_column",
+        "profile_column",
+        "execute_sql"
+      ],
+      "final_sql": "SELECT video_id, like_count FROM tt_videos WHERE status = 'PUBLISHED' ORDER BY like_count DESC, video_id ASC LIMIT 10",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": "gold=(5000011.0,) cand=(17.0, 5000050.0); gold=(5000023.0,) cand=(17.0, 5000316.0); gold=(5000031.0,) cand=(18.0, 5000058.0)",
+      "elapsed_s": 10.7,
+      "usage": {
+        "completion_tokens": 361,
+        "prompt_tokens": 47231,
+        "total_tokens": 47592
+      }
+    },
+    {
+      "id": "Q18",
+      "arm": "harness",
+      "question": "\u3010\u77ed\u89c6\u9891\u3011\u4e00\u5171\u6709\u591a\u5c11\u4f4d\u4e0d\u540c\u7684\u771f\u4eba\u7528\u6237\uff1f\uff08\u540c\u4e00 device_id \u89c6\u4e3a\u540c\u4e00\u4eba\uff09",
+      "defect_ids": [
+        "D6"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 5,
+      "tool_calls": [
+        "resolve_term",
+        "profile_column",
+        "profile_column",
+        "execute_sql"
+      ],
+      "final_sql": "SELECT COUNT(DISTINCT device_id) FROM tt_users LIMIT 200",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": null,
+      "elapsed_s": 6.9,
+      "usage": {
+        "completion_tokens": 210,
+        "prompt_tokens": 38917,
+        "total_tokens": 39127
+      }
+    },
+    {
+      "id": "Q19",
+      "arm": "harness",
+      "question": "\u3010\u77ed\u89c6\u9891\u3011\u6309\u4e3e\u62a5\u539f\u56e0\u4ee3\u7801\uff08reason_code\uff09\u7edf\u8ba1\u5404\u4ee3\u7801\u7684\u4e3e\u62a5\u6570\u3002",
+      "defect_ids": [
+        "D9"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 4,
+      "tool_calls": [
+        "resolve_term",
+        "profile_column",
+        "execute_sql"
+      ],
+      "final_sql": "SELECT reason_code, COUNT(*) AS report_count FROM tt_reports GROUP BY reason_code ORDER BY report_count DESC LIMIT 200",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": null,
+      "elapsed_s": 8.93,
+      "usage": {
+        "completion_tokens": 292,
+        "prompt_tokens": 31096,
+        "total_tokens": 31388
+      }
+    },
+    {
+      "id": "Q20",
+      "arm": "harness",
+      "question": "\u3010\u77ed\u89c6\u9891\u3011\u5e73\u5747\u6bcf\u4e2a\u63a8\u5e7f\u7684\u9884\u7b97\u662f\u591a\u5c11\u7f8e\u5143\uff1f",
+      "defect_ids": [
+        "D10"
+      ],
+      "correct": false,
+      "answered": true,
+      "steps": 4,
+      "tool_calls": [
+        "resolve_term",
+        "profile_column",
+        "execute_sql"
+      ],
+      "final_sql": "SELECT AVG(budget) AS average_budget FROM tt_promotions LIMIT 200",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": "gold=(1247.693,) cand=(45936.29,)",
+      "elapsed_s": 7.54,
+      "usage": {
+        "completion_tokens": 237,
+        "prompt_tokens": 30844,
+        "total_tokens": 31081
+      }
+    },
+    {
+      "id": "Q21",
+      "arm": "harness",
+      "question": "\u3010\u5730\u56fe\u3011\u6709\u591a\u5c11\u4e2a\u4e0d\u540c\u7684\u5730\u70b9\u88ab\u7528\u6237\u4e3e\u62a5\u8fc7\uff1f",
+      "defect_ids": [
+        "D1"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 5,
+      "tool_calls": [
+        "resolve_term",
+        "profile_column",
+        "profile_column",
+        "execute_sql"
+      ],
+      "final_sql": "SELECT COUNT(DISTINCT mf.listing_id) AS distinct_flagged_places FROM map_flags AS mf JOIN map_places AS mp ON mf.listing_id = mp.place_id LIMIT 200",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": null,
+      "elapsed_s": 6.22,
+      "usage": {
+        "completion_tokens": 191,
+        "prompt_tokens": 38785,
+        "total_tokens": 38976
+      }
+    },
+    {
+      "id": "Q22",
+      "arm": "harness",
+      "question": "\u3010\u5730\u56fe\u3011\u76ee\u524d\u6b63\u5e38\u8425\u4e1a\uff08OPEN\uff09\u7684\u5730\u70b9\u6709\u591a\u5c11\u4e2a\uff1f",
+      "defect_ids": [
+        "D4"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 4,
+      "tool_calls": [
+        "resolve_term",
+        "profile_column",
+        "execute_sql"
+      ],
+      "final_sql": "SELECT COUNT(*) AS open_count FROM map_places WHERE status = 'OPEN' LIMIT 200",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": null,
+      "elapsed_s": 5.45,
+      "usage": {
+        "completion_tokens": 179,
+        "prompt_tokens": 30767,
+        "total_tokens": 30946
+      }
+    },
+    {
+      "id": "Q23",
+      "arm": "harness",
+      "question": "\u3010\u5730\u56fe\u3011\u6240\u6709\u8bc4\u4ef7\u7684\u5e73\u5747\u8bc4\u5206\u662f\u591a\u5c11\uff1f",
+      "defect_ids": [
+        "D5"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 4,
+      "tool_calls": [
+        "resolve_term",
+        "profile_column",
+        "execute_sql"
+      ],
+      "final_sql": "SELECT AVG(CAST(rating AS DECIMAL(3, 2))) AS avg_rating FROM map_reviews WHERE REGEXP_LIKE(rating, '^[0-9]+$') LIMIT 200",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": null,
+      "elapsed_s": 8.84,
+      "usage": {
+        "completion_tokens": 306,
+        "prompt_tokens": 31396,
+        "total_tokens": 31702
+      }
+    },
+    {
+      "id": "Q24",
+      "arm": "harness",
+      "question": "\u3010\u5730\u56fe\u30112024-12-29\uff08\u672c\u5730\u65e5\u671f\uff09\u5f53\u5929\u6709\u591a\u5c11\u6761\u8bc4\u4ef7\uff1f",
+      "defect_ids": [
+        "D7"
+      ],
+      "correct": false,
+      "answered": true,
+      "steps": 4,
+      "tool_calls": [
+        "resolve_term",
+        "profile_column",
+        "execute_sql"
+      ],
+      "final_sql": "SELECT COUNT(*) AS review_count FROM map_reviews WHERE DATE(created_at) = '2024-12-29' LIMIT 200",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": "gold=(41.0,) cand=(52.0,)",
+      "elapsed_s": 4.45,
+      "usage": {
+        "completion_tokens": 146,
+        "prompt_tokens": 30983,
+        "total_tokens": 31129
+      }
+    },
+    {
+      "id": "Q25",
+      "arm": "harness",
+      "question": "\u3010\u5730\u56fe\u3011\u6709\u591a\u5c11\u6761\u8bc4\u4ef7\u627e\u4e0d\u5230\u5bf9\u5e94\u7684\u5730\u70b9\uff1f",
+      "defect_ids": [
+        "D8"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 4,
+      "tool_calls": [
+        "resolve_term",
+        "profile_column",
+        "profile_column",
+        "execute_sql"
+      ],
+      "final_sql": "SELECT COUNT(*) AS count FROM map_reviews AS mr WHERE NOT mr.place_ref IN (SELECT place_id FROM map_places) LIMIT 200",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": null,
+      "elapsed_s": 9.82,
+      "usage": {
+        "completion_tokens": 336,
+        "prompt_tokens": 31125,
+        "total_tokens": 31461
+      }
+    },
+    {
+      "id": "C01",
+      "arm": "harness",
+      "question": "\u3010\u533b\u7597\u3011\u4e00\u5171\u6709\u591a\u5c11\u4e2a\u79d1\u5ba4\uff1f",
+      "defect_ids": [],
+      "correct": true,
+      "answered": true,
+      "steps": 4,
+      "tool_calls": [
+        "resolve_term",
+        "profile_column",
+        "execute_sql"
+      ],
+      "final_sql": "SELECT COUNT(*) FROM med_departments LIMIT 200",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": null,
+      "elapsed_s": 4.2,
+      "usage": {
+        "completion_tokens": 119,
+        "prompt_tokens": 30723,
+        "total_tokens": 30842
+      }
+    },
+    {
+      "id": "C02",
+      "arm": "harness",
+      "question": "\u3010\u6cd5\u5f8b\u3011\u52b3\u52a8\u4e89\u8bae\uff08employment\uff09\u7c7b\u578b\u7684\u6848\u4ef6\u6709\u591a\u5c11\u4ef6\uff1f",
+      "defect_ids": [],
+      "correct": true,
+      "answered": true,
+      "steps": 3,
+      "tool_calls": [
+        "resolve_term",
+        "execute_sql"
+      ],
+      "final_sql": "SELECT COUNT(*) AS case_count FROM leg_cases WHERE case_type = 'employment' LIMIT 200",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": null,
+      "elapsed_s": 2.98,
+      "usage": {
+        "completion_tokens": 87,
+        "prompt_tokens": 22785,
+        "total_tokens": 22872
+      }
+    },
+    {
+      "id": "C03",
+      "arm": "harness",
+      "question": "\u3010\u7535\u5546\u3011\u4e00\u5171\u6709\u591a\u5c11\u4e2a\u4ed3\u5e93\uff1f",
+      "defect_ids": [],
+      "correct": true,
+      "answered": true,
+      "steps": 3,
+      "tool_calls": [
+        "resolve_term",
+        "execute_sql"
+      ],
+      "final_sql": "SELECT COUNT(*) AS warehouse_count FROM ecom_warehouses LIMIT 200",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": null,
+      "elapsed_s": 2.78,
+      "usage": {
+        "completion_tokens": 77,
+        "prompt_tokens": 22758,
+        "total_tokens": 22835
+      }
+    },
+    {
+      "id": "C04",
+      "arm": "harness",
+      "question": "\u3010\u77ed\u89c6\u9891\u3011\u4e00\u5171\u6709\u591a\u5c11\u4f4d\u521b\u4f5c\u8005\uff1f",
+      "defect_ids": [],
+      "correct": true,
+      "answered": true,
+      "steps": 4,
+      "tool_calls": [
+        "resolve_term",
+        "profile_column",
+        "execute_sql"
+      ],
+      "final_sql": "SELECT COUNT(*) AS creator_count FROM tt_creators LIMIT 200",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": null,
+      "elapsed_s": 4.02,
+      "usage": {
+        "completion_tokens": 123,
+        "prompt_tokens": 30660,
+        "total_tokens": 30783
+      }
+    },
+    {
+      "id": "C05",
+      "arm": "harness",
+      "question": "\u3010\u5730\u56fe\u3011\u4e00\u5171\u6709\u591a\u5c11\u4f4d\u5546\u5bb6\uff08owners\uff09\uff1f",
+      "defect_ids": [],
+      "correct": true,
+      "answered": true,
+      "steps": 4,
+      "tool_calls": [
+        "resolve_term",
+        "profile_column",
+        "execute_sql"
+      ],
+      "final_sql": "SELECT COUNT(*) AS owner_count FROM map_owners LIMIT 200",
+      "abandoned_sql": null,
+      "error": null,
+      "error_kind": null,
+      "mismatch": null,
+      "elapsed_s": 4.36,
+      "usage": {
+        "completion_tokens": 142,
+        "prompt_tokens": 30656,
+        "total_tokens": 30798
+      }
+    }
+  ]
+}

@@ -1,0 +1,90 @@
+{
+  "branch": "mixed-dataset",
+  "remote": "https://github.com/usp787/NEU_harness_hackathon.git",
+  "commit": "6e30845da54e6845ee87b119436ac5c7fd33bbc9",
+  "dataset": "mixed",
+  "provider": "local",
+  "base_url": "http://127.0.0.1:8080/v1",
+  "model": "qwen3.5-9b (Qwen3.5-9B-Q4_K_M.gguf)",
+  "thinking": false,
+  "knowledge": "curated (0 terms -- mixed ships no glossary; harness ran structure-only)",
+  "llama_server_args": "-ngl 99 -c 16384 --cache-type-k q8_0 --cache-type-v q8_0 --jinja",
+  "context_budget": 16384,
+  "peak_prompt_tokens": 9290,
+  "prompt_percentiles": {
+    "p50": 7647,
+    "p90": 8211,
+    "p99": 9055,
+    "max": 9290,
+    "samples": 168
+  },
+  "questions": {
+    "path": "mixed/questions.yaml",
+    "sha256": "6bb2320091ec0444b5edbdbb673d56111b01948c037579000ef46605ff0b9793"
+  },
+  "seed_sha256": "ed63973369c6b018930f5c47a29b76d9a3d7d8d0351758658ea690995d3a7baf",
+  "defects_sha256": "fa298f96c21ab3be79e54430d36348323882639f9b3d27d45a5bd9a2a1e0b2f4",
+  "database": {
+    "version": "8.0.35",
+    "name": "mixed",
+    "host": "127.0.0.1",
+    "port": 3307,
+    "table_count": 25,
+    "rows_per_table": {
+      "ecom_customers": 208,
+      "ecom_orders": 900,
+      "ecom_payments": 887,
+      "ecom_products": 150,
+      "ecom_shipments": 858,
+      "ecom_warehouses": 5,
+      "leg_cases": 300,
+      "leg_docket_entries": 2899,
+      "leg_fee_invoices": 350,
+      "leg_parties": 128,
+      "map_flags": 200,
+      "map_owners": 80,
+      "map_places": 308,
+      "map_reviews": 6000,
+      "med_admissions": 420,
+      "med_departments": 8,
+      "med_lab_events": 6878,
+      "med_lab_items": 8,
+      "med_prescriptions": 836,
+      "tt_creators": 60,
+      "tt_likes": 5000,
+      "tt_promotions": 120,
+      "tt_reports": 250,
+      "tt_users": 408,
+      "tt_videos": 500
+    },
+    "total_rows": 27761
+  },
+  "validation": {
+    "generate_check": "seed.sql is up to date",
+    "dry_arm": "30/30",
+    "pytest": "225 passed, 50 skipped"
+  },
+  "results": {
+    "baseline": {
+      "correct": 18,
+      "total": 30,
+      "accuracy": 0.6,
+      "context_overflow": 0,
+      "graded": 30,
+      "accuracy_graded": 0.6,
+      "elapsed_s": 33.6,
+      "total_tokens": 103322
+    },
+    "harness": {
+      "correct": 21,
+      "total": 30,
+      "accuracy": 0.7,
+      "context_overflow": 0,
+      "graded": 30,
+      "accuracy_graded": 0.7,
+      "elapsed_s": 243.2,
+      "total_tokens": 1064025
+    },
+    "lift_points": 10.0
+  }
+}

@@ -33,7 +33,19 @@ load_dotenv(ROOT / ".env")
 from harness import dataset
 OUT_DIR = dataset.results_dir()
 
-DEFECT_ORDER = ([f"D{i}" for i in range(1, 11)] if dataset.name() == "saas" else [f"MT{i:02d}" for i in range(1, 9)]) + ["control"]
+def _defect_order() -> list[str]:
+    """Defect ids in the order the dataset itself declares them.
+
+    This was a saas-or-milk_tea ternary, which quietly assumed every third
+    dataset used milk-tea's MT01-MT08 ids. The mixed dataset uses D1-D10, so
+    its whole breakdown table vanished (no id matched) rather than erroring.
+    Reading defects.yaml means the table cannot disagree with the benchmark.
+    """
+    spec = yaml.safe_load((dataset.data_dir() / "defects.yaml").read_text(encoding="utf-8"))
+    return [d["id"] for d in spec["defects"]] + ["control"]
+
+
+DEFECT_ORDER = _defect_order()
 
 
 def _load(arm: str, provider: str, tag: str | None = None) -> dict | None:

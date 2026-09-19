@@ -1,0 +1,71 @@
+LLM: llama.cpp up; models=['qwen3.5-9b']
+
+=== BASELINE (local) -- 30 questions ===
+  [ 1/30] PASS Q01   [D1      ]   4.5s
+  [ 2/30] PASS Q02   [D4      ]   0.8s
+  [ 3/30] PASS Q03   [D5      ]   1.5s
+  [ 4/30] FAIL Q04   [D7      ]   1.1s  <- gold=(56.0,) cand=(48.0,)
+  [ 5/30] FAIL Q05   [D10     ]   1.5s  <- gold=(164.4301,) cand=(138.8585,)
+  [ 6/30] PASS Q06   [D2      ]   0.8s
+  [ 7/30] FAIL Q07   [D3      ]   2.9s  <- MySQL error 1054: Unknown column 'c.case_no' in 'field list'
+  [ 8/30] FAIL Q08   [D6      ]   1.0s  <- gold=(57.0,) cand=(65.0,)
+  [ 9/30] PASS Q09   [D8      ]   1.2s
+  [10/30] FAIL Q10   [D9      ]   1.2s  <- gold=(1.0, 29.0) cand=(1.0, 27.0); gold=(12.0, 2.0) cand=(2.0, 7.0); gold=(2.0, 7.0) cand=(2.0, 8.0)
+  [11/30] PASS Q11   [D1      ]   1.4s
+  [12/30] PASS Q12   [D4      ]   0.9s
+  [13/30] FAIL Q13   [D5      ]   0.8s  <- gold=(13.8,) cand=('varies',)
+  [14/30] FAIL Q14   [D8      ]   0.8s  <- gold=(37.0,) cand=(0.0,)
+  [15/30] FAIL Q15   [D10     ]   0.9s  <- gold=(430311.6,) cand=(12190420.0,)
+  [16/30] PASS Q16   [D2      ]   0.8s
+  [17/30] FAIL Q17   [D3      ]   1.2s  <- gold=(5000011.0,) cand=(17.0, 5000050.0); gold=(5000023.0,) cand=(17.0, 5000316.0); gold=(5000031.0,) cand=(18.0, 5000058.0)
+  [18/30] PASS Q18   [D6      ]   0.7s
+  [19/30] PASS Q19   [D9      ]   0.8s
+  [20/30] FAIL Q20   [D10     ]   0.6s  <- gold=(1247.693,) cand=(45936.29,)
+  [21/30] PASS Q21   [D1      ]   0.7s
+  [22/30] PASS Q22   [D4      ]   0.8s
+  [23/30] FAIL Q23   [D5      ]   1.0s  <- gold=(3.872067,) cand=(3.712667,)
+  [24/30] FAIL Q24   [D7      ]   1.1s  <- gold=(41.0,) cand=(52.0,)
+  [25/30] PASS Q25   [D8      ]   1.1s
+  [26/30] PASS C01   [control ]   0.6s
+  [27/30] PASS C02   [control ]   0.8s
+  [28/30] PASS C03   [control ]   0.7s
+  [29/30] PASS C04   [control ]   0.6s
+  [30/30] PASS C05   [control ]   0.6s
+  -> 18/30 = 60.0%  (33.6s)   written to eval\out\mixed\baseline-local.json
+
+=== HARNESS (local, knowledge=curated) -- 30 questions ===
+  [ 1/30] FAIL Q01   [D1      ]  33.5s  <- gold=(80.0,) cand=(78.0,)
+  [ 2/30] PASS Q02   [D4      ]   5.8s
+  [ 3/30] PASS Q03   [D5      ]   7.7s
+  [ 4/30] FAIL Q04   [D7      ]   6.1s  <- gold=(56.0,) cand=(48.0,)
+  [ 5/30] FAIL Q05   [D10     ]  20.6s  <- gold=(164.4301,) cand=(164.6263,)
+  [ 6/30] PASS Q06   [D2      ]   4.0s
+  [ 7/30] FAIL Q07   [D3      ]  13.6s  <- gold=(50024.0,) cand=('2024-11-29', 'CLOSED', 'civil', 50133.0); gold=(50064.0,) cand=('2024-12-11', 'CLOSED', 'contract', 50064.0); gold=(50073.0,) cand=('2024-12-20', 'OPEN', 'personal_injury', 50024.0)
+  [ 8/30] FAIL Q08   [D6      ]   4.5s  <- gold=(57.0,) cand=(65.0,)
+  [ 9/30] PASS Q09   [D8      ]   6.4s
+  [10/30] PASS Q10   [D9      ]  13.4s
+  [11/30] PASS Q11   [D1      ]   6.3s
+  [12/30] PASS Q12   [D4      ]   5.2s
+  [13/30] PASS Q13   [D5      ]   8.6s
+  [14/30] PASS Q14   [D8      ]   9.2s
+  [15/30] FAIL Q15   [D10     ]   5.8s  <- gold=(430311.6,) cand=(12190420.0,)
+  [16/30] PASS Q16   [D2      ]   5.1s
+  [17/30] FAIL Q17   [D3      ]  10.7s  <- gold=(5000011.0,) cand=(17.0, 5000050.0); gold=(5000023.0,) cand=(17.0, 5000316.0); gold=(5000031.0,) cand=(18.0, 5000058.0)
+  [18/30] PASS Q18   [D6      ]   6.9s
+  [19/30] PASS Q19   [D9      ]   8.9s
+  [20/30] FAIL Q20   [D10     ]   7.5s  <- gold=(1247.693,) cand=(45936.29,)
+  [21/30] PASS Q21   [D1      ]   6.2s
+  [22/30] PASS Q22   [D4      ]   5.5s
+  [23/30] PASS Q23   [D5      ]   8.8s
+  [24/30] FAIL Q24   [D7      ]   4.5s  <- gold=(41.0,) cand=(52.0,)
+  [25/30] PASS Q25   [D8      ]   9.8s
+  [26/30] PASS C01   [control ]   4.2s
+  [27/30] PASS C02   [control ]   3.0s
+  [28/30] PASS C03   [control ]   2.8s
+  [29/30] PASS C04   [control ]   4.0s
+  [30/30] PASS C05   [control ]   4.4s
+  -> 21/30 = 70.0%  (243.2s)   written to eval\out\mixed\harness-local.json
+
+LIFT: 60.0% -> 70.0%  (+10.0 points)
+
+Render the per-defect breakdown with:  python eval/report.py
