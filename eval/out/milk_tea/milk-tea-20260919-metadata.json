@@ -1,0 +1,113 @@
+{
+  "branch": "feat/milk-tea-dataset",
+  "remote": "https://github.com/LinxuanLi-DS/NEU_harness_hackathon.git",
+  "commit": "0032bcd8e8d20788cc268b1c06efa33dd01d9772",
+  "dataset": "milk_tea",
+  "dataset_version": "milk-tea-1.0.0",
+  "provider": "local",
+  "base_url": "http://127.0.0.1:8080/v1",
+  "thinking": false,
+  "knowledge": "curated",
+  "questions": {
+    "path": "data/milk_tea/questions.yaml",
+    "sha256": "0cc597d32bfe57aac0cd9453b1a61487725f998562226418f25da507f25afe59"
+  },
+  "seed_sha256": "1e243284346c753c1a48a188c1276bc5fc6b6582a3ed2a505dc2560a7e5293e9",
+  "database": {
+    "version": "8.0.35",
+    "name": "milk_tea",
+    "host": "127.0.0.1",
+    "port": 3307,
+    "rows_per_table": {
+      "materials": 20,
+      "warehouses": 4,
+      "customers": 26,
+      "sales": 4000,
+      "sales_returns": 600,
+      "stock_in": 2200,
+      "stock_out": 2200,
+      "production_receipts": 950
+    },
+    "total_rows": 10000
+  },
+  "grants": [
+    {
+      "Grants for harness_ro@%": "GRANT USAGE ON *.* TO `harness_ro`@`%`"
+    },
+    {
+      "Grants for harness_ro@%": "GRANT SELECT ON `harness`.* TO `harness_ro`@`%`"
+    },
+    {
+      "Grants for harness_ro@%": "GRANT SELECT ON `milk_tea`.* TO `harness_ro`@`%`"
+    }
+  ],
+  "model": {
+    "models": [
+      {
+        "name": "qwen3.5-9b",
+        "model": "qwen3.5-9b",
+        "modified_at": "",
+        "size": "",
+        "digest": "",
+        "type": "model",
+        "description": "",
+        "tags": [
+          ""
+        ],
+        "capabilities": [
+          "completion"
+        ],
+        "parameters": "",
+        "details": {
+          "parent_model": "",
+          "format": "gguf",
+          "family": "",
+          "families": [
+            ""
+          ],
+          "parameter_size": "",
+          "quantization_level": ""
+        }
+      }
+    ],
+    "object": "list",
+    "data": [
+      {
+        "id": "qwen3.5-9b",
+        "aliases": [
+          "qwen3.5-9b"
+        ],
+        "tags": [],
+        "object": "model",
+        "created": 1789846366,
+        "owned_by": "llamacpp",
+        "meta": {
+          "vocab_type": true,
+          "n_vocab": 248320,
+          "n_ctx": 32768,
+          "n_ctx_train": 262144,
+          "n_embd": 4096,
+          "n_params": 8953803264,
+          "size": 5669554176,
+          "ftype": "Q4_K - Medium"
+        }
+      }
+    ]
+  },
+  "results": {
+    "baseline": {
+      "correct": 6,
+      "total": 20,
+      "elapsed_s": 27.0
+    },
+    "harness": {
+      "correct": 15,
+      "total": 20,
+      "elapsed_s": 246.4
+    },
+    "dry_gold": {
+      "correct": 20,
+      "total": 20
+    }
+  }
+}

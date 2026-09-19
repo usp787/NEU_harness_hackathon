@@ -1,0 +1,590 @@
+{
+  "arm": "harness",
+  "provider": "local",
+  "dataset": "milk_tea",
+  "questions": {
+    "path": "data/milk_tea/questions.yaml",
+    "sha256": "0cc597d32bfe57aac0cd9453b1a61487725f998562226418f25da507f25afe59"
+  },
+  "knowledge": "curated",
+  "summary": {
+    "total": 20,
+    "correct": 15,
+    "accuracy": 0.75,
+    "by_defect": {
+      "MT01": {
+        "n": 3,
+        "correct": 2
+      },
+      "MT02": {
+        "n": 3,
+        "correct": 2
+      },
+      "MT03": {
+        "n": 2,
+        "correct": 0
+      },
+      "MT04": {
+        "n": 3,
+        "correct": 1
+      },
+      "MT05": {
+        "n": 2,
+        "correct": 2
+      },
+      "MT06": {
+        "n": 3,
+        "correct": 1
+      },
+      "MT07": {
+        "n": 2,
+        "correct": 2
+      },
+      "MT08": {
+        "n": 2,
+        "correct": 2
+      },
+      "control": {
+        "n": 3,
+        "correct": 3
+      }
+    },
+    "elapsed_s": 246.4
+  },
+  "records": [
+    {
+      "id": "MTQ01",
+      "arm": "harness",
+      "question": "What is the approved sales quantity in base cups?",
+      "defect_ids": [
+        "MT01"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 4,
+      "tool_calls": [
+        "resolve_term",
+        "execute_sql",
+        "execute_sql"
+      ],
+      "final_sql": "SELECT SUM(s.qty * CASE WHEN s.unit = 'box' THEN m.units_per_box ELSE 1 END) AS total_base_cups FROM sales AS s JOIN materials AS m ON s.material_id = m.material_id WHERE s.status = 'approved' LIMIT 200",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": null,
+      "elapsed_s": 13.88,
+      "usage": {
+        "completion_tokens": 373,
+        "prompt_tokens": 20847,
+        "total_tokens": 21220
+      }
+    },
+    {
+      "id": "MTQ02",
+      "arm": "harness",
+      "question": "What is the posted stock-out quantity in base cups, including waste?",
+      "defect_ids": [
+        "MT01"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 9,
+      "tool_calls": [
+        "resolve_term",
+        "profile_column",
+        "profile_column",
+        "profile_column",
+        "execute_sql",
+        "execute_sql",
+        "execute_sql",
+        "execute_sql"
+      ],
+      "final_sql": "SELECT SUM(so.qty * CASE WHEN so.unit = 'box' THEN m.units_per_box ELSE 1 END) AS total_cups FROM stock_out AS so JOIN materials AS m ON so.material_id = m.material_id WHERE so.status = 'posted' LIMIT 200",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": null,
+      "elapsed_s": 13.52,
+      "usage": {
+        "completion_tokens": 449,
+        "prompt_tokens": 49139,
+        "total_tokens": 49588
+      }
+    },
+    {
+      "id": "MTQ03",
+      "arm": "harness",
+      "question": "How many distinct approved sales documents are there?",
+      "defect_ids": [
+        "MT02"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 3,
+      "tool_calls": [
+        "resolve_term",
+        "execute_sql"
+      ],
+      "final_sql": "SELECT COUNT(DISTINCT order_code) FROM sales WHERE status = 'approved' LIMIT 200",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": null,
+      "elapsed_s": 6.63,
+      "usage": {
+        "completion_tokens": 234,
+        "prompt_tokens": 13985,
+        "total_tokens": 14219
+      }
+    },
+    {
+      "id": "MTQ04",
+      "arm": "harness",
+      "question": "How many approved sales-return document lines are there?",
+      "defect_ids": [
+        "MT02"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 3,
+      "tool_calls": [
+        "resolve_term",
+        "execute_sql"
+      ],
+      "final_sql": "SELECT COUNT(*) AS count FROM sales_returns WHERE status = 'C' LIMIT 200",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": null,
+      "elapsed_s": 4.56,
+      "usage": {
+        "completion_tokens": 157,
+        "prompt_tokens": 14040,
+        "total_tokens": 14197
+      }
+    },
+    {
+      "id": "MTQ05",
+      "arm": "harness",
+      "question": "What is the approved refund total in CNY excluding tax, expressed as a positive amount?",
+      "defect_ids": [
+        "MT03"
+      ],
+      "correct": false,
+      "answered": true,
+      "steps": 4,
+      "tool_calls": [
+        "resolve_term",
+        "profile_column",
+        "execute_sql"
+      ],
+      "final_sql": "SELECT ABS(SUM(refund_net)) AS refund_total FROM sales_returns WHERE status = 'C' LIMIT 200",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": "gold=(21957.0,) cand=(20097.0,)",
+      "elapsed_s": 12.58,
+      "usage": {
+        "completion_tokens": 461,
+        "prompt_tokens": 19653,
+        "total_tokens": 20114
+      }
+    },
+    {
+      "id": "MTQ06",
+      "arm": "harness",
+      "question": "How many base cups were returned on approved sales returns, expressed as a positive quantity?",
+      "defect_ids": [
+        "MT03"
+      ],
+      "correct": false,
+      "answered": true,
+      "steps": 8,
+      "tool_calls": [
+        "resolve_term",
+        "profile_column",
+        "profile_column",
+        "profile_column",
+        "execute_sql",
+        "execute_sql",
+        "execute_sql"
+      ],
+      "final_sql": "SELECT SUM(ABS(sr.qty) * COALESCE(m.units_per_box, 1)) AS total_base_cups FROM sales_returns AS sr JOIN materials AS m ON sr.material_id = m.material_id WHERE sr.status = 'C' LIMIT 200",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": "gold=(2876.0,) cand=(11490.0,)",
+      "elapsed_s": 18.49,
+      "usage": {
+        "completion_tokens": 649,
+        "prompt_tokens": 43057,
+        "total_tokens": 43706
+      }
+    },
+    {
+      "id": "MTQ07",
+      "arm": "harness",
+      "question": "How many base cups physically entered inventory from posted purchases, counting each movement once?",
+      "defect_ids": [
+        "MT04"
+      ],
+      "correct": false,
+      "answered": true,
+      "steps": 6,
+      "tool_calls": [
+        "resolve_term",
+        "profile_column",
+        "profile_column",
+        "profile_column",
+        "execute_sql"
+      ],
+      "final_sql": "SELECT SUM(si.qty * CASE WHEN si.unit = 'box' THEN m.units_per_box ELSE 1 END) AS total_base_cups FROM stock_in AS si JOIN materials AS m ON si.material_id = m.material_id WHERE si.source_type = 'purchase' AND si.status = 'posted' LIMIT 200",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": "gold=(5620000.0,) cand=(6020000.0,)",
+      "elapsed_s": 10.85,
+      "usage": {
+        "completion_tokens": 369,
+        "prompt_tokens": 30449,
+        "total_tokens": 30818
+      }
+    },
+    {
+      "id": "MTQ08",
+      "arm": "harness",
+      "question": "How many extra stock-in export rows are replays of an existing movement?",
+      "defect_ids": [
+        "MT04"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 4,
+      "tool_calls": [
+        "resolve_term",
+        "profile_column",
+        "execute_sql"
+      ],
+      "final_sql": "SELECT COUNT(*) AS replay_count FROM (SELECT movement_key, COUNT(*) AS cnt FROM stock_in GROUP BY movement_key HAVING COUNT(*) > 1) AS t LIMIT 200",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": null,
+      "elapsed_s": 7.19,
+      "usage": {
+        "completion_tokens": 251,
+        "prompt_tokens": 19034,
+        "total_tokens": 19285
+      }
+    },
+    {
+      "id": "MTQ09",
+      "arm": "harness",
+      "question": "What is the tax-inclusive total value of approved sales orders in CNY?",
+      "defect_ids": [
+        "MT05"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 4,
+      "tool_calls": [
+        "resolve_term",
+        "profile_column",
+        "execute_sql"
+      ],
+      "final_sql": "SELECT SUM(line_tax_amount) AS total_tax_inclusive_value FROM sales WHERE status = 'approved' LIMIT 200",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": null,
+      "elapsed_s": 4.56,
+      "usage": {
+        "completion_tokens": 151,
+        "prompt_tokens": 18962,
+        "total_tokens": 19113
+      }
+    },
+    {
+      "id": "MTQ10",
+      "arm": "harness",
+      "question": "What is the largest approved sales order's tax-inclusive total in CNY? Return only the amount.",
+      "defect_ids": [
+        "MT05"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 3,
+      "tool_calls": [
+        "resolve_term",
+        "execute_sql"
+      ],
+      "final_sql": "SELECT MAX(order_total) FROM sales WHERE status = 'approved' LIMIT 200",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": null,
+      "elapsed_s": 5.63,
+      "usage": {
+        "completion_tokens": 197,
+        "prompt_tokens": 13994,
+        "total_tokens": 14191
+      }
+    },
+    {
+      "id": "MTQ11",
+      "arm": "harness",
+      "question": "How many base cups physically entered inventory from completed production? Count each physical receipt once.",
+      "defect_ids": [
+        "MT06"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 5,
+      "tool_calls": [
+        "resolve_term",
+        "profile_column",
+        "profile_column",
+        "profile_column",
+        "profile_column",
+        "execute_sql"
+      ],
+      "final_sql": "SELECT SUM(pr.qty * CASE WHEN pr.unit = 'cup' THEN 1 ELSE m.units_per_box END) AS total_base_cups FROM production_receipts AS pr JOIN materials AS m ON pr.material_id = m.material_id WHERE pr.status = 'completed' LIMIT 200",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": null,
+      "elapsed_s": 16.92,
+      "usage": {
+        "completion_tokens": 605,
+        "prompt_tokens": 25969,
+        "total_tokens": 26574
+      }
+    },
+    {
+      "id": "MTQ12",
+      "arm": "harness",
+      "question": "What is the total physical inventory inflow in base cups from all posted sources, including production and returns? Count each movement once.",
+      "defect_ids": [
+        "MT06"
+      ],
+      "correct": false,
+      "answered": true,
+      "steps": 5,
+      "tool_calls": [
+        "resolve_term",
+        "profile_column",
+        "profile_column",
+        "profile_column",
+        "profile_column",
+        "execute_sql"
+      ],
+      "final_sql": "SELECT SUM(si.qty * CASE WHEN si.unit = 'box' THEN m.units_per_box ELSE 1 END) AS total_cups FROM stock_in AS si JOIN materials AS m ON si.material_id = m.material_id WHERE si.status = 'posted' LIMIT 200",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": "gold=(6196076.0,) cand=(6596076.0,)",
+      "elapsed_s": 14.54,
+      "usage": {
+        "completion_tokens": 509,
+        "prompt_tokens": 26339,
+        "total_tokens": 26848
+      }
+    },
+    {
+      "id": "MTQ13",
+      "arm": "harness",
+      "question": "What is the highest valid measured stock-out weight in kg across all export rows?",
+      "defect_ids": [
+        "MT07"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 4,
+      "tool_calls": [
+        "resolve_term",
+        "profile_column",
+        "execute_sql"
+      ],
+      "final_sql": "SELECT MAX(CAST(weight_text AS DECIMAL(18, 2))) AS max_weight_kg FROM stock_out WHERE REGEXP_LIKE(weight_text, '^[0-9]+([.][0-9]+)?$') LIMIT 200",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": null,
+      "elapsed_s": 7.99,
+      "usage": {
+        "completion_tokens": 277,
+        "prompt_tokens": 19639,
+        "total_tokens": 19916
+      }
+    },
+    {
+      "id": "MTQ14",
+      "arm": "harness",
+      "question": "What is the average valid measured stock-out weight in kg across all export rows, excluding unavailable readings? Round to 4 decimal places.",
+      "defect_ids": [
+        "MT07"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 4,
+      "tool_calls": [
+        "resolve_term",
+        "profile_column",
+        "execute_sql"
+      ],
+      "final_sql": "SELECT ROUND(AVG(CAST(weight_text AS DECIMAL(18, 4))), 4) AS avg_weight FROM stock_out WHERE REGEXP_LIKE(weight_text, '^[0-9]+(\\\\.[0-9]+)?$') LIMIT 200",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": null,
+      "elapsed_s": 8.02,
+      "usage": {
+        "completion_tokens": 277,
+        "prompt_tokens": 19674,
+        "total_tokens": 19951
+      }
+    },
+    {
+      "id": "MTQ15",
+      "arm": "harness",
+      "question": "How many stock-in export rows are posted? This is a raw-row diagnostic; include replay rows.",
+      "defect_ids": [
+        "MT08"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 3,
+      "tool_calls": [
+        "profile_column",
+        "execute_sql"
+      ],
+      "final_sql": "SELECT COUNT(*) AS posted_count FROM stock_in WHERE status = 'posted' LIMIT 200",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": null,
+      "elapsed_s": 4.78,
+      "usage": {
+        "completion_tokens": 167,
+        "prompt_tokens": 13766,
+        "total_tokens": 13933
+      }
+    },
+    {
+      "id": "MTQ16",
+      "arm": "harness",
+      "question": "How many stock-in export rows are not posted? This is a raw-row diagnostic; include replay rows.",
+      "defect_ids": [
+        "MT08"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 3,
+      "tool_calls": [
+        "profile_column",
+        "execute_sql"
+      ],
+      "final_sql": "SELECT COUNT(*) AS count FROM stock_in WHERE status = 'draft' LIMIT 200",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": null,
+      "elapsed_s": 5.38,
+      "usage": {
+        "completion_tokens": 191,
+        "prompt_tokens": 13784,
+        "total_tokens": 13975
+      }
+    },
+    {
+      "id": "MTQ17",
+      "arm": "harness",
+      "question": "How many material master records are there?",
+      "defect_ids": [],
+      "correct": true,
+      "answered": true,
+      "steps": 2,
+      "tool_calls": [
+        "execute_sql"
+      ],
+      "final_sql": "SELECT COUNT(*) AS material_count FROM materials LIMIT 200",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": null,
+      "elapsed_s": 2.67,
+      "usage": {
+        "completion_tokens": 91,
+        "prompt_tokens": 8851,
+        "total_tokens": 8942
+      }
+    },
+    {
+      "id": "MTQ18",
+      "arm": "harness",
+      "question": "How many warehouses are in the warehouse master?",
+      "defect_ids": [],
+      "correct": true,
+      "answered": true,
+      "steps": 2,
+      "tool_calls": [
+        "execute_sql"
+      ],
+      "final_sql": "SELECT COUNT(*) FROM warehouses LIMIT 200",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": null,
+      "elapsed_s": 1.33,
+      "usage": {
+        "completion_tokens": 42,
+        "prompt_tokens": 8804,
+        "total_tokens": 8846
+      }
+    },
+    {
+      "id": "MTQ19",
+      "arm": "harness",
+      "question": "How many customer stores are in the customer master?",
+      "defect_ids": [],
+      "correct": true,
+      "answered": true,
+      "steps": 2,
+      "tool_calls": [
+        "execute_sql"
+      ],
+      "final_sql": "SELECT COUNT(*) FROM customers LIMIT 200",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": null,
+      "elapsed_s": 1.39,
+      "usage": {
+        "completion_tokens": 44,
+        "prompt_tokens": 8807,
+        "total_tokens": 8851
+      }
+    },
+    {
+      "id": "MTQ20",
+      "arm": "harness",
+      "question": "As of 2026-09-19, what is inventory on hand in base cups across all warehouses? Opening inventory before these documents was zero.",
+      "defect_ids": [
+        "MT01",
+        "MT02",
+        "MT04",
+        "MT06"
+      ],
+      "correct": false,
+      "answered": false,
+      "steps": 12,
+      "tool_calls": [
+        "resolve_term",
+        "profile_column",
+        "profile_column",
+        "profile_column",
+        "execute_sql",
+        "execute_sql",
+        "execute_sql",
+        "execute_sql",
+        "execute_sql",
+        "execute_sql",
+        "execute_sql",
+        "execute_sql",
+        "execute_sql",
+        "execute_sql"
+      ],
+      "final_sql": "",
+      "abandoned_sql": "SELECT si.warehouse_id, si.material_id, SUM(si.qty * CASE WHEN si.unit = 'box' THEN m.units_per_box ELSE 1 END) AS in_cups FROM stock_in AS si JOIN materials AS m ON si.material_id = m.material_id WHERE si.status = 'posted' GROUP BY si.warehouse_id, si.material_id UNION ALL SELECT so.warehouse_id, so.material_id, -SUM(so.qty * CASE WHEN so.unit = 'box' THEN m.units_per_box ELSE 1 END) AS in_cups FROM stock_out AS so JOIN materials AS m ON so.material_id = m.material_id WHERE so.status = 'posted' GROUP BY so.warehouse_id, so.material_id ORDER BY warehouse_id, material_id",
+      "error": "Hit the 12-step limit without a final answer.",
+      "mismatch": "candidate returned 0 rows; gold has 1",
+      "elapsed_s": 85.45,
+      "usage": {
+        "completion_tokens": 3138,
+        "prompt_tokens": 90160,
+        "total_tokens": 93298
+      }
+    }
+  ]
+}

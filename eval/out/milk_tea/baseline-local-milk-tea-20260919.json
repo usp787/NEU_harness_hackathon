@@ -1,0 +1,553 @@
+{
+  "arm": "baseline",
+  "provider": "local",
+  "dataset": "milk_tea",
+  "questions": {
+    "path": "data/milk_tea/questions.yaml",
+    "sha256": "0cc597d32bfe57aac0cd9453b1a61487725f998562226418f25da507f25afe59"
+  },
+  "knowledge": "curated",
+  "summary": {
+    "total": 20,
+    "correct": 6,
+    "accuracy": 0.3,
+    "by_defect": {
+      "MT01": {
+        "n": 3,
+        "correct": 0
+      },
+      "MT02": {
+        "n": 3,
+        "correct": 1
+      },
+      "MT03": {
+        "n": 2,
+        "correct": 0
+      },
+      "MT04": {
+        "n": 3,
+        "correct": 0
+      },
+      "MT05": {
+        "n": 2,
+        "correct": 2
+      },
+      "MT06": {
+        "n": 3,
+        "correct": 0
+      },
+      "MT07": {
+        "n": 2,
+        "correct": 0
+      },
+      "MT08": {
+        "n": 2,
+        "correct": 0
+      },
+      "control": {
+        "n": 3,
+        "correct": 3
+      }
+    },
+    "elapsed_s": 27.0
+  },
+  "records": [
+    {
+      "id": "MTQ01",
+      "arm": "baseline",
+      "question": "What is the approved sales quantity in base cups?",
+      "defect_ids": [
+        "MT01"
+      ],
+      "correct": false,
+      "answered": true,
+      "steps": 1,
+      "tool_calls": [],
+      "final_sql": "SELECT SUM(s.qty * m.units_per_box) AS approved_sales_quantity_cups\nFROM sales s\nJOIN materials m ON s.material_id = m.material_id\nWHERE s.status = 'Approved'",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": "gold=(121217.0,) cand=(499158.0,)",
+      "elapsed_s": 3.14,
+      "usage": {
+        "completion_tokens": 46,
+        "prompt_tokens": 2094,
+        "total_tokens": 2140,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    },
+    {
+      "id": "MTQ02",
+      "arm": "baseline",
+      "question": "What is the posted stock-out quantity in base cups, including waste?",
+      "defect_ids": [
+        "MT01"
+      ],
+      "correct": false,
+      "answered": true,
+      "steps": 1,
+      "tool_calls": [],
+      "final_sql": "SELECT SUM(so.qty * m.units_per_box) AS total_base_cups\nFROM stock_out so\nJOIN materials m ON so.material_id = m.material_id\nWHERE so.status = 'Posted'",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": "gold=(70308.0,) cand=(294438.0,)",
+      "elapsed_s": 1.31,
+      "usage": {
+        "completion_tokens": 46,
+        "prompt_tokens": 2098,
+        "total_tokens": 2144,
+        "prompt_tokens_details": {
+          "cached_tokens": 2072
+        }
+      }
+    },
+    {
+      "id": "MTQ03",
+      "arm": "baseline",
+      "question": "How many distinct approved sales documents are there?",
+      "defect_ids": [
+        "MT02"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 1,
+      "tool_calls": [],
+      "final_sql": "SELECT COUNT(DISTINCT order_code) AS approved_sales_count\nFROM sales\nWHERE status = 'Approved'",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": null,
+      "elapsed_s": 0.87,
+      "usage": {
+        "completion_tokens": 28,
+        "prompt_tokens": 2093,
+        "total_tokens": 2121,
+        "prompt_tokens_details": {
+          "cached_tokens": 2072
+        }
+      }
+    },
+    {
+      "id": "MTQ04",
+      "arm": "baseline",
+      "question": "How many approved sales-return document lines are there?",
+      "defect_ids": [
+        "MT02"
+      ],
+      "correct": false,
+      "answered": true,
+      "steps": 1,
+      "tool_calls": [],
+      "final_sql": "SELECT COUNT(*) \nFROM sales_returns \nWHERE status = 'APPROVED'",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": "gold=(540.0,) cand=(0.0,)",
+      "elapsed_s": 0.73,
+      "usage": {
+        "completion_tokens": 22,
+        "prompt_tokens": 2094,
+        "total_tokens": 2116,
+        "prompt_tokens_details": {
+          "cached_tokens": 2072
+        }
+      }
+    },
+    {
+      "id": "MTQ05",
+      "arm": "baseline",
+      "question": "What is the approved refund total in CNY excluding tax, expressed as a positive amount?",
+      "defect_ids": [
+        "MT03"
+      ],
+      "correct": false,
+      "answered": true,
+      "steps": 1,
+      "tool_calls": [],
+      "final_sql": "SELECT SUM(ABS(refund_net)) AS approved_refund_total_cny_excl_tax\nFROM sales_returns\nWHERE status = 'APPROVED'",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": "gold=(21957.0,) cand=(None,)",
+      "elapsed_s": 1.07,
+      "usage": {
+        "completion_tokens": 37,
+        "prompt_tokens": 2102,
+        "total_tokens": 2139,
+        "prompt_tokens_details": {
+          "cached_tokens": 2072
+        }
+      }
+    },
+    {
+      "id": "MTQ06",
+      "arm": "baseline",
+      "question": "How many base cups were returned on approved sales returns, expressed as a positive quantity?",
+      "defect_ids": [
+        "MT03"
+      ],
+      "correct": false,
+      "answered": true,
+      "steps": 1,
+      "tool_calls": [],
+      "final_sql": "SELECT SUM(s.qty) AS total_base_cups\nFROM sales_returns s\nJOIN materials m ON s.material_id = m.material_id\nWHERE s.status = 'Approved'\n  AND m.material_name = 'Base Cup'",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": "gold=(2876.0,) cand=(None,)",
+      "elapsed_s": 1.44,
+      "usage": {
+        "completion_tokens": 52,
+        "prompt_tokens": 2101,
+        "total_tokens": 2153,
+        "prompt_tokens_details": {
+          "cached_tokens": 2072
+        }
+      }
+    },
+    {
+      "id": "MTQ07",
+      "arm": "baseline",
+      "question": "How many base cups physically entered inventory from posted purchases, counting each movement once?",
+      "defect_ids": [
+        "MT04"
+      ],
+      "correct": false,
+      "answered": true,
+      "steps": 1,
+      "tool_calls": [],
+      "final_sql": "SELECT SUM(s.qty) AS total_base_cups\nFROM stock_in s\nJOIN materials m ON s.material_id = m.material_id\nWHERE s.status = 'posted'\n  AND s.source_type = 'Purchase'\n  AND m.base_unit = 'Cup'",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": "gold=(5620000.0,) cand=(6020000.0,)",
+      "elapsed_s": 1.74,
+      "usage": {
+        "completion_tokens": 62,
+        "prompt_tokens": 2100,
+        "total_tokens": 2162,
+        "prompt_tokens_details": {
+          "cached_tokens": 2072
+        }
+      }
+    },
+    {
+      "id": "MTQ08",
+      "arm": "baseline",
+      "question": "How many extra stock-in export rows are replays of an existing movement?",
+      "defect_ids": [
+        "MT04"
+      ],
+      "correct": false,
+      "answered": true,
+      "steps": 1,
+      "tool_calls": [],
+      "final_sql": "SELECT COUNT(*) AS extra_stock_in_replays\nFROM stock_in\nWHERE source_line_id IS NOT NULL\n  AND source_line_id IN (\n    SELECT source_line_id\n    FROM stock_in\n    WHERE source_line_id IS NOT NULL\n  )",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": "gold=(40.0,) cand=(1550.0,)",
+      "elapsed_s": 1.6,
+      "usage": {
+        "completion_tokens": 58,
+        "prompt_tokens": 2099,
+        "total_tokens": 2157,
+        "prompt_tokens_details": {
+          "cached_tokens": 2072
+        }
+      }
+    },
+    {
+      "id": "MTQ09",
+      "arm": "baseline",
+      "question": "What is the tax-inclusive total value of approved sales orders in CNY?",
+      "defect_ids": [
+        "MT05"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 1,
+      "tool_calls": [],
+      "final_sql": "SELECT SUM(line_tax_amount) AS total_tax_inclusive_value\nFROM sales\nWHERE status = 'Approved'",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": null,
+      "elapsed_s": 0.85,
+      "usage": {
+        "completion_tokens": 28,
+        "prompt_tokens": 2100,
+        "total_tokens": 2128,
+        "prompt_tokens_details": {
+          "cached_tokens": 2072
+        }
+      }
+    },
+    {
+      "id": "MTQ10",
+      "arm": "baseline",
+      "question": "What is the largest approved sales order's tax-inclusive total in CNY? Return only the amount.",
+      "defect_ids": [
+        "MT05"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 1,
+      "tool_calls": [],
+      "final_sql": "SELECT MAX(order_total) AS largest_approved_sales_order_total\nFROM sales\nWHERE status = 'APPROVED'",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": null,
+      "elapsed_s": 0.88,
+      "usage": {
+        "completion_tokens": 29,
+        "prompt_tokens": 2105,
+        "total_tokens": 2134,
+        "prompt_tokens_details": {
+          "cached_tokens": 2072
+        }
+      }
+    },
+    {
+      "id": "MTQ11",
+      "arm": "baseline",
+      "question": "How many base cups physically entered inventory from completed production? Count each physical receipt once.",
+      "defect_ids": [
+        "MT06"
+      ],
+      "correct": false,
+      "answered": true,
+      "steps": 1,
+      "tool_calls": [],
+      "final_sql": "SELECT COUNT(DISTINCT p.row_id) AS physical_receipt_count\nFROM production_receipts p\nJOIN materials m ON p.material_id = m.material_id\nWHERE p.status = 'Completed'\n  AND p.unit = 'Cup'\n  AND m.base_unit = 'Cup'",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": "gold=(573200.0,) cand=(760.0,)",
+      "elapsed_s": 1.83,
+      "usage": {
+        "completion_tokens": 66,
+        "prompt_tokens": 2101,
+        "total_tokens": 2167,
+        "prompt_tokens_details": {
+          "cached_tokens": 2072
+        }
+      }
+    },
+    {
+      "id": "MTQ12",
+      "arm": "baseline",
+      "question": "What is the total physical inventory inflow in base cups from all posted sources, including production and returns? Count each movement once.",
+      "defect_ids": [
+        "MT06"
+      ],
+      "correct": false,
+      "answered": true,
+      "steps": 1,
+      "tool_calls": [],
+      "final_sql": "SELECT \n    SUM(\n        COALESCE(si.qty, 0) + \n        COALESCE(sr.qty, 0)\n    ) * m.units_per_box AS total_physical_inventory_inflow_cups\nFROM \n    stock_in si\n    LEFT JOIN sales_returns sr ON si.material_id = sr.material_id AND si.warehouse_id = sr.warehouse_id AND si.batch_no = sr.batch_no\n    LEFT JOIN materials m ON si.material_id = m.material_id\nWHERE \n    si.posted_at IS NOT NULL\n    AND (si.movement_key = 'Production' OR sr.refund_net > 0)\nGROUP BY \n    m.units_per_box",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": "row count differs: gold 1, candidate 4 (gold[0]=(6196076.0,), cand[0]=(105273500.0,))",
+      "elapsed_s": 3.93,
+      "usage": {
+        "completion_tokens": 146,
+        "prompt_tokens": 2110,
+        "total_tokens": 2256,
+        "prompt_tokens_details": {
+          "cached_tokens": 2072
+        }
+      }
+    },
+    {
+      "id": "MTQ13",
+      "arm": "baseline",
+      "question": "What is the highest valid measured stock-out weight in kg across all export rows?",
+      "defect_ids": [
+        "MT07"
+      ],
+      "correct": false,
+      "answered": true,
+      "steps": 1,
+      "tool_calls": [],
+      "final_sql": "SELECT MAX(weight_text) AS max_weight\nFROM stock_out\nWHERE weight_text IS NOT NULL\n  AND weight_text != ''",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": "gold=(499.75,) cand=('N/A',)",
+      "elapsed_s": 0.95,
+      "usage": {
+        "completion_tokens": 32,
+        "prompt_tokens": 2100,
+        "total_tokens": 2132,
+        "prompt_tokens_details": {
+          "cached_tokens": 2072
+        }
+      }
+    },
+    {
+      "id": "MTQ14",
+      "arm": "baseline",
+      "question": "What is the average valid measured stock-out weight in kg across all export rows, excluding unavailable readings? Round to 4 decimal places.",
+      "defect_ids": [
+        "MT07"
+      ],
+      "correct": false,
+      "answered": true,
+      "steps": 1,
+      "tool_calls": [],
+      "final_sql": "SELECT AVG(CAST(weight_text AS DECIMAL(18,4))) AS avg_weight\nFROM stock_out\nWHERE weight_text IS NOT NULL\n  AND weight_text != ''",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": "gold=(250.606,) cand=(242.9763,)",
+      "elapsed_s": 1.21,
+      "usage": {
+        "completion_tokens": 42,
+        "prompt_tokens": 2111,
+        "total_tokens": 2153,
+        "prompt_tokens_details": {
+          "cached_tokens": 2072
+        }
+      }
+    },
+    {
+      "id": "MTQ15",
+      "arm": "baseline",
+      "question": "How many stock-in export rows are posted? This is a raw-row diagnostic; include replay rows.",
+      "defect_ids": [
+        "MT08"
+      ],
+      "correct": false,
+      "answered": true,
+      "steps": 1,
+      "tool_calls": [],
+      "final_sql": "SELECT COUNT(*) \nFROM stock_in \nWHERE posted_at IS NOT NULL",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": "gold=(1997.0,) cand=(1843.0,)",
+      "elapsed_s": 0.64,
+      "usage": {
+        "completion_tokens": 21,
+        "prompt_tokens": 2104,
+        "total_tokens": 2125,
+        "prompt_tokens_details": {
+          "cached_tokens": 2072
+        }
+      }
+    },
+    {
+      "id": "MTQ16",
+      "arm": "baseline",
+      "question": "How many stock-in export rows are not posted? This is a raw-row diagnostic; include replay rows.",
+      "defect_ids": [
+        "MT08"
+      ],
+      "correct": false,
+      "answered": true,
+      "steps": 1,
+      "tool_calls": [],
+      "final_sql": "SELECT COUNT(*) \nFROM stock_in \nWHERE posted_at IS NULL",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": "gold=(203.0,) cand=(357.0,)",
+      "elapsed_s": 0.63,
+      "usage": {
+        "completion_tokens": 20,
+        "prompt_tokens": 2105,
+        "total_tokens": 2125,
+        "prompt_tokens_details": {
+          "cached_tokens": 2072
+        }
+      }
+    },
+    {
+      "id": "MTQ17",
+      "arm": "baseline",
+      "question": "How many material master records are there?",
+      "defect_ids": [],
+      "correct": true,
+      "answered": true,
+      "steps": 1,
+      "tool_calls": [],
+      "final_sql": "SELECT COUNT(*) AS material_master_count\nFROM materials",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": null,
+      "elapsed_s": 0.56,
+      "usage": {
+        "completion_tokens": 17,
+        "prompt_tokens": 2092,
+        "total_tokens": 2109,
+        "prompt_tokens_details": {
+          "cached_tokens": 2072
+        }
+      }
+    },
+    {
+      "id": "MTQ18",
+      "arm": "baseline",
+      "question": "How many warehouses are in the warehouse master?",
+      "defect_ids": [],
+      "correct": true,
+      "answered": true,
+      "steps": 1,
+      "tool_calls": [],
+      "final_sql": "SELECT COUNT(*) AS warehouse_count FROM warehouses",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": null,
+      "elapsed_s": 0.5,
+      "usage": {
+        "completion_tokens": 15,
+        "prompt_tokens": 2093,
+        "total_tokens": 2108,
+        "prompt_tokens_details": {
+          "cached_tokens": 2072
+        }
+      }
+    },
+    {
+      "id": "MTQ19",
+      "arm": "baseline",
+      "question": "How many customer stores are in the customer master?",
+      "defect_ids": [],
+      "correct": true,
+      "answered": true,
+      "steps": 1,
+      "tool_calls": [],
+      "final_sql": "SELECT COUNT(*) AS customer_store_count\nFROM customers",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": null,
+      "elapsed_s": 0.58,
+      "usage": {
+        "completion_tokens": 17,
+        "prompt_tokens": 2094,
+        "total_tokens": 2111,
+        "prompt_tokens_details": {
+          "cached_tokens": 2072
+        }
+      }
+    },
+    {
+      "id": "MTQ20",
+      "arm": "baseline",
+      "question": "As of 2026-09-19, what is inventory on hand in base cups across all warehouses? Opening inventory before these documents was zero.",
+      "defect_ids": [
+        "MT01",
+        "MT02",
+        "MT04",
+        "MT06"
+      ],
+      "correct": false,
+      "answered": false,
+      "steps": 1,
+      "tool_calls": [],
+      "final_sql": "SELECT SUM(m.units_per_box * COALESCE(SUM(so.qty), 0)) AS total_base_cups\nFROM materials m\nLEFT JOIN stock_out so ON m.material_id = so.material_id\nWHERE so.order_date <= '2026-09-19'\n  AND so.status = 'posted'\n  AND so.source_type = 'Production Receipt'\n  AND so.qty > 0",
+      "abandoned_sql": null,
+      "error": "MySQL error 1111: Invalid use of group function",
+      "mismatch": "candidate returned 0 rows; gold has 1",
+      "elapsed_s": 2.5,
+      "usage": {
+        "completion_tokens": 94,
+        "prompt_tokens": 2118,
+        "total_tokens": 2212,
+        "prompt_tokens_details": {
+          "cached_tokens": 2072
+        }
+      }
+    }
+  ]
+}

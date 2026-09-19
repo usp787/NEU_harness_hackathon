@@ -33,12 +33,14 @@ sys.path.insert(0, str(ROOT))
 load_dotenv(ROOT / ".env")
 
 from eval.grade import explain_mismatch, matches  # noqa: E402
-from harness import agent, schema_card  # noqa: E402
+from harness import agent, schema_card, dataset  # noqa: E402
 from harness.db import DbConfig, connect  # noqa: E402
 from harness.memory import knowledge_mode  # noqa: E402
 
-OUT_DIR = ROOT / "eval" / "out"
-DEFAULT_QUESTIONS = ROOT / "data" / "questions.yaml"
+OUT_DIR = dataset.results_dir()
+# Both follow HARNESS_DATASET, so the milk-tea fixture reads and writes its own
+# files. --questions still overrides the file within the selected dataset.
+DEFAULT_QUESTIONS = dataset.data_dir() / "questions.yaml"
 
 
 def load_questions(limit: int | None = None, only: str | None = None,
@@ -150,8 +152,9 @@ def main() -> int:
                     default="both")
     ap.add_argument("--limit", type=int, default=None)
     ap.add_argument("--questions", type=Path, default=DEFAULT_QUESTIONS,
-                    help="Question YAML file (default: data/questions.yaml). "
-                         "Alternate files use their stem as the output tag unless --tag is set.")
+                    help="Question YAML file (default: the selected dataset's "
+                         "questions.yaml). Alternate files use their stem as the "
+                         "output tag unless --tag is set.")
     ap.add_argument("--only", type=str, default=None,
                     help="Comma-separated question ids or defect ids, e.g. D5,Q01")
     ap.add_argument("--verbose", action="store_true")
@@ -209,7 +212,7 @@ def main() -> int:
 
         path = OUT_DIR / f"{arm}-{provider}{'-' + tag if tag else ''}.json"
         path.write_text(json.dumps(
-            {"arm": arm, "provider": provider,
+            {"arm": arm, "provider": provider, "dataset": dataset.name(),
              "questions": question_source,
              # Recorded because the harness arm's result is meaningless without
              # it: the same code scores differently depending on whether its
@@ -225,7 +228,7 @@ def main() -> int:
         print(f"\nLIFT: {b*100:.1f}% -> {h*100:.1f}%  "
               f"({(h-b)*100:+.1f} points)")
         print("\nRender the per-defect breakdown with:  python eval/report.py")
-    return 0
+    return 1 if args.arm == "dry" and any(s["correct"] != s["total"] for s in summaries.values()) else 0
 
 
 if __name__ == "__main__":

@@ -1,5 +1,12 @@
 # NEU Harness Hackathon
 
+**New dataset:** [Milk-tea supply-chain documents](data/milk_tea/README.md) —
+10,000 synthetic rows, five document types, eight defects and 20 bilingual gold
+questions. Select with `HARNESS_DATASET=milk_tea DB_NAME=milk_tea`; the original
+SaaS benchmark remains the default. First local A/B on it, Qwen3.5-9B with
+curated knowledge: **6/20 → 15/20 (+45 points)** —
+[run, per-defect breakdown and the five remaining failures](eval/out/milk_tea/milk-tea-20260919-report.md).
+
 A **harness** that helps a small model answer analytical questions correctly over
 messy internal company data.
 
@@ -576,7 +583,8 @@ stand — with the discovered arm read at its clean value.
 
 ## Status
 
-**Verified — 198 tests passing (7 skipped), plus a 31/31 eval dry run:**
+**Verified — 268 tests passing (7 skipped) with both fixtures loaded, plus 31/31
+(SaaS) and 20/20 (milk-tea) eval dry runs:**
 - 10-table schema, deterministic generator, all 10 defects asserted present in a live DB
 - Read-only enforcement verified at the MySQL grant layer (`DROP` denied)
 - Join inference, profiling, schema card, glossary retrieval
@@ -588,9 +596,15 @@ stand — with the discovered arm read at its clean value.
 - Discovery: the verification contract's anti-gaming rejections, question-blindness,
   artifact round-trip, and that each of the four curated-knowledge channels is
   actually dark under `HARNESS_KNOWLEDGE=discovered`
+- Milk-tea fixture: artifact-drift check, 10000 loaded rows matching its manifest,
+  every gold answer reproduced against an independent Python `Decimal` oracle, and
+  every `naive_sql` confirmed to execute and differ from gold
 
-**Not yet verified:** any arm driven by a real model. The agent loop is proven;
-what a 9B actually does with it is the open question.
+Without `MILK_TEA_TEST_DB=1` the suite is 225 passed, 50 skipped — the milk-tea
+database tests announce themselves as skipped rather than silently passing.
+
+**Not yet verified:** automatically discovered knowledge on the milk-tea dataset;
+only the curated mode has been measured there.
 
 ---
 

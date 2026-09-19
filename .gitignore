@@ -5,6 +5,10 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 
+# Local git worktrees used to inspect teammates' branches. These are separate
+# checkouts, not project content; committing one embeds a repo inside the repo.
+.worktrees/
+
 # Model weights live on D:\models, never in the repo.
 *.gguf
 
@@ -32,6 +36,19 @@ eval/out/*
 !eval/out/yingzi-20260919-metadata.json
 !eval/out/yingzi-20260919-report.md
 !eval/out/yingzi-20260919.log
+
+# The milk-tea dataset writes to its own results directory. Unignore the
+# directory first -- git never descends into an ignored directory, so the
+# negations below would not be seen otherwise -- then re-ignore its contents
+# and keep only the committed milk-tea evaluation.
+!eval/out/milk_tea/
+eval/out/milk_tea/*
+!eval/out/milk_tea/baseline-local-milk-tea-20260919.json
+!eval/out/milk_tea/harness-local-milk-tea-20260919.json
+!eval/out/milk_tea/dry-gold-milk-tea-20260919.json
+!eval/out/milk_tea/milk-tea-20260919-metadata.json
+!eval/out/milk_tea/milk-tea-20260919-report.md
+!eval/out/milk_tea/milk-tea-20260919.log
 
 .DS_Store
 Thumbs.db

@@ -1,0 +1,413 @@
+{
+  "arm": "dry",
+  "provider": "gold",
+  "dataset": "milk_tea",
+  "questions": {
+    "path": "data/milk_tea/questions.yaml",
+    "sha256": "0cc597d32bfe57aac0cd9453b1a61487725f998562226418f25da507f25afe59"
+  },
+  "knowledge": "curated",
+  "summary": {
+    "total": 20,
+    "correct": 20,
+    "accuracy": 1.0,
+    "by_defect": {
+      "MT01": {
+        "n": 3,
+        "correct": 3
+      },
+      "MT02": {
+        "n": 3,
+        "correct": 3
+      },
+      "MT03": {
+        "n": 2,
+        "correct": 2
+      },
+      "MT04": {
+        "n": 3,
+        "correct": 3
+      },
+      "MT05": {
+        "n": 2,
+        "correct": 2
+      },
+      "MT06": {
+        "n": 3,
+        "correct": 3
+      },
+      "MT07": {
+        "n": 2,
+        "correct": 2
+      },
+      "MT08": {
+        "n": 2,
+        "correct": 2
+      },
+      "control": {
+        "n": 3,
+        "correct": 3
+      }
+    },
+    "elapsed_s": 0.4
+  },
+  "records": [
+    {
+      "id": "MTQ01",
+      "arm": "dry",
+      "question": "What is the approved sales quantity in base cups?",
+      "defect_ids": [
+        "MT01"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 0,
+      "tool_calls": [],
+      "final_sql": "SELECT SUM(s.qty * CASE WHEN s.unit = 'box' THEN m.units_per_box ELSE 1 END) AS n FROM sales s JOIN materials m USING(material_id) WHERE s.status='approved'",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": null,
+      "elapsed_s": 0.03,
+      "usage": {}
+    },
+    {
+      "id": "MTQ02",
+      "arm": "dry",
+      "question": "What is the posted stock-out quantity in base cups, including waste?",
+      "defect_ids": [
+        "MT01"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 0,
+      "tool_calls": [],
+      "final_sql": "SELECT SUM(o.qty * CASE WHEN o.unit = 'box' THEN m.units_per_box ELSE 1 END) AS n FROM stock_out o JOIN materials m USING(material_id) WHERE o.status='posted'",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": null,
+      "elapsed_s": 0.02,
+      "usage": {}
+    },
+    {
+      "id": "MTQ03",
+      "arm": "dry",
+      "question": "How many distinct approved sales documents are there?",
+      "defect_ids": [
+        "MT02"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 0,
+      "tool_calls": [],
+      "final_sql": "SELECT COUNT(DISTINCT order_code) AS n FROM sales WHERE status='approved'",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": null,
+      "elapsed_s": 0.02,
+      "usage": {}
+    },
+    {
+      "id": "MTQ04",
+      "arm": "dry",
+      "question": "How many approved sales-return document lines are there?",
+      "defect_ids": [
+        "MT02"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 0,
+      "tool_calls": [],
+      "final_sql": "SELECT COUNT(*) AS n FROM sales_returns WHERE status='C'",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": null,
+      "elapsed_s": 0.02,
+      "usage": {}
+    },
+    {
+      "id": "MTQ05",
+      "arm": "dry",
+      "question": "What is the approved refund total in CNY excluding tax, expressed as a positive amount?",
+      "defect_ids": [
+        "MT03"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 0,
+      "tool_calls": [],
+      "final_sql": "SELECT SUM(ABS(refund_net)) AS n FROM sales_returns WHERE status='C'",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": null,
+      "elapsed_s": 0.01,
+      "usage": {}
+    },
+    {
+      "id": "MTQ06",
+      "arm": "dry",
+      "question": "How many base cups were returned on approved sales returns, expressed as a positive quantity?",
+      "defect_ids": [
+        "MT03"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 0,
+      "tool_calls": [],
+      "final_sql": "SELECT SUM(ABS(r.qty)*CASE WHEN r.unit='box' THEN m.units_per_box ELSE 1 END) AS n FROM sales_returns r JOIN materials m USING(material_id) WHERE r.status='C'",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": null,
+      "elapsed_s": 0.03,
+      "usage": {}
+    },
+    {
+      "id": "MTQ07",
+      "arm": "dry",
+      "question": "How many base cups physically entered inventory from posted purchases, counting each movement once?",
+      "defect_ids": [
+        "MT04"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 0,
+      "tool_calls": [],
+      "final_sql": "WITH unique_in AS (\n  SELECT i.*, ROW_NUMBER() OVER (PARTITION BY movement_key ORDER BY row_id) AS rn\n  FROM stock_in i\n) SELECT SUM(i.qty * CASE WHEN i.unit = 'box' THEN m.units_per_box ELSE 1 END) AS n FROM unique_in i JOIN materials m USING(material_id) WHERE rn=1 AND status='posted' AND source_type='purchase'",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": null,
+      "elapsed_s": 0.02,
+      "usage": {}
+    },
+    {
+      "id": "MTQ08",
+      "arm": "dry",
+      "question": "How many extra stock-in export rows are replays of an existing movement?",
+      "defect_ids": [
+        "MT04"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 0,
+      "tool_calls": [],
+      "final_sql": "SELECT COUNT(*)-COUNT(DISTINCT movement_key) AS n FROM stock_in",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": null,
+      "elapsed_s": 0.01,
+      "usage": {}
+    },
+    {
+      "id": "MTQ09",
+      "arm": "dry",
+      "question": "What is the tax-inclusive total value of approved sales orders in CNY?",
+      "defect_ids": [
+        "MT05"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 0,
+      "tool_calls": [],
+      "final_sql": "SELECT SUM(line_tax_amount) AS n FROM sales WHERE status='approved'",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": null,
+      "elapsed_s": 0.02,
+      "usage": {}
+    },
+    {
+      "id": "MTQ10",
+      "arm": "dry",
+      "question": "What is the largest approved sales order's tax-inclusive total in CNY? Return only the amount.",
+      "defect_ids": [
+        "MT05"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 0,
+      "tool_calls": [],
+      "final_sql": "SELECT MAX(order_total) AS n FROM sales WHERE status='approved'",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": null,
+      "elapsed_s": 0.02,
+      "usage": {}
+    },
+    {
+      "id": "MTQ11",
+      "arm": "dry",
+      "question": "How many base cups physically entered inventory from completed production? Count each physical receipt once.",
+      "defect_ids": [
+        "MT06"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 0,
+      "tool_calls": [],
+      "final_sql": "SELECT SUM(p.qty * CASE WHEN p.unit = 'box' THEN m.units_per_box ELSE 1 END) AS n FROM production_receipts p JOIN materials m USING(material_id) WHERE status='completed'",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": null,
+      "elapsed_s": 0.01,
+      "usage": {}
+    },
+    {
+      "id": "MTQ12",
+      "arm": "dry",
+      "question": "What is the total physical inventory inflow in base cups from all posted sources, including production and returns? Count each movement once.",
+      "defect_ids": [
+        "MT06"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 0,
+      "tool_calls": [],
+      "final_sql": "WITH unique_in AS (\n  SELECT i.*, ROW_NUMBER() OVER (PARTITION BY movement_key ORDER BY row_id) AS rn\n  FROM stock_in i\n) SELECT SUM(i.qty * CASE WHEN i.unit = 'box' THEN m.units_per_box ELSE 1 END) AS n FROM unique_in i JOIN materials m USING(material_id) WHERE rn=1 AND status='posted'",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": null,
+      "elapsed_s": 0.01,
+      "usage": {}
+    },
+    {
+      "id": "MTQ13",
+      "arm": "dry",
+      "question": "What is the highest valid measured stock-out weight in kg across all export rows?",
+      "defect_ids": [
+        "MT07"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 0,
+      "tool_calls": [],
+      "final_sql": "SELECT MAX(CAST(weight_text AS DECIMAL(18,4))) AS n FROM stock_out WHERE weight_text REGEXP '^[0-9]+([.][0-9]+)?$'",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": null,
+      "elapsed_s": 0.01,
+      "usage": {}
+    },
+    {
+      "id": "MTQ14",
+      "arm": "dry",
+      "question": "What is the average valid measured stock-out weight in kg across all export rows, excluding unavailable readings? Round to 4 decimal places.",
+      "defect_ids": [
+        "MT07"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 0,
+      "tool_calls": [],
+      "final_sql": "SELECT ROUND(AVG(CAST(weight_text AS DECIMAL(18,4))),4) AS n FROM stock_out WHERE weight_text REGEXP '^[0-9]+([.][0-9]+)?$'",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": null,
+      "elapsed_s": 0.01,
+      "usage": {}
+    },
+    {
+      "id": "MTQ15",
+      "arm": "dry",
+      "question": "How many stock-in export rows are posted? This is a raw-row diagnostic; include replay rows.",
+      "defect_ids": [
+        "MT08"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 0,
+      "tool_calls": [],
+      "final_sql": "SELECT COUNT(*) AS n FROM stock_in WHERE status='posted'",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": null,
+      "elapsed_s": 0.03,
+      "usage": {}
+    },
+    {
+      "id": "MTQ16",
+      "arm": "dry",
+      "question": "How many stock-in export rows are not posted? This is a raw-row diagnostic; include replay rows.",
+      "defect_ids": [
+        "MT08"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 0,
+      "tool_calls": [],
+      "final_sql": "SELECT COUNT(*) AS n FROM stock_in WHERE status<>'posted'",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": null,
+      "elapsed_s": 0.01,
+      "usage": {}
+    },
+    {
+      "id": "MTQ17",
+      "arm": "dry",
+      "question": "How many material master records are there?",
+      "defect_ids": [],
+      "correct": true,
+      "answered": true,
+      "steps": 0,
+      "tool_calls": [],
+      "final_sql": "SELECT COUNT(*) AS n FROM materials",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": null,
+      "elapsed_s": 0.03,
+      "usage": {}
+    },
+    {
+      "id": "MTQ18",
+      "arm": "dry",
+      "question": "How many warehouses are in the warehouse master?",
+      "defect_ids": [],
+      "correct": true,
+      "answered": true,
+      "steps": 0,
+      "tool_calls": [],
+      "final_sql": "SELECT COUNT(*) AS n FROM warehouses",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": null,
+      "elapsed_s": 0.01,
+      "usage": {}
+    },
+    {
+      "id": "MTQ19",
+      "arm": "dry",
+      "question": "How many customer stores are in the customer master?",
+      "defect_ids": [],
+      "correct": true,
+      "answered": true,
+      "steps": 0,
+      "tool_calls": [],
+      "final_sql": "SELECT COUNT(*) AS n FROM customers",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": null,
+      "elapsed_s": 0.01,
+      "usage": {}
+    },
+    {
+      "id": "MTQ20",
+      "arm": "dry",
+      "question": "As of 2026-09-19, what is inventory on hand in base cups across all warehouses? Opening inventory before these documents was zero.",
+      "defect_ids": [
+        "MT01",
+        "MT02",
+        "MT04",
+        "MT06"
+      ],
+      "correct": true,
+      "answered": true,
+      "steps": 0,
+      "tool_calls": [],
+      "final_sql": "WITH unique_in AS (\n  SELECT i.*, ROW_NUMBER() OVER (PARTITION BY movement_key ORDER BY row_id) AS rn\n  FROM stock_in i\n) SELECT (SELECT SUM(i.qty * CASE WHEN i.unit = 'box' THEN m.units_per_box ELSE 1 END) FROM unique_in i JOIN materials m USING(material_id) WHERE rn=1 AND status='posted') - (SELECT SUM(o.qty * CASE WHEN o.unit = 'box' THEN m.units_per_box ELSE 1 END) FROM stock_out o JOIN materials m USING(material_id) WHERE status='posted') AS n",
+      "abandoned_sql": null,
+      "error": null,
+      "mismatch": null,
+      "elapsed_s": 0.02,
+      "usage": {}
+    }
+  ]
+}

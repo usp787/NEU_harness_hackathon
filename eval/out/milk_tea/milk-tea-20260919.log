@@ -1,0 +1,51 @@
+LLM: llama.cpp up; models=['qwen3.5-9b']
+
+=== BASELINE (local) -- 20 questions ===
+  [ 1/20] FAIL MTQ01 [MT01    ]   3.1s  <- gold=(121217.0,) cand=(499158.0,)
+  [ 2/20] FAIL MTQ02 [MT01    ]   1.3s  <- gold=(70308.0,) cand=(294438.0,)
+  [ 3/20] PASS MTQ03 [MT02    ]   0.9s
+  [ 4/20] FAIL MTQ04 [MT02    ]   0.7s  <- gold=(540.0,) cand=(0.0,)
+  [ 5/20] FAIL MTQ05 [MT03    ]   1.1s  <- gold=(21957.0,) cand=(None,)
+  [ 6/20] FAIL MTQ06 [MT03    ]   1.4s  <- gold=(2876.0,) cand=(None,)
+  [ 7/20] FAIL MTQ07 [MT04    ]   1.7s  <- gold=(5620000.0,) cand=(6020000.0,)
+  [ 8/20] FAIL MTQ08 [MT04    ]   1.6s  <- gold=(40.0,) cand=(1550.0,)
+  [ 9/20] PASS MTQ09 [MT05    ]   0.8s
+  [10/20] PASS MTQ10 [MT05    ]   0.9s
+  [11/20] FAIL MTQ11 [MT06    ]   1.8s  <- gold=(573200.0,) cand=(760.0,)
+  [12/20] FAIL MTQ12 [MT06    ]   3.9s  <- row count differs: gold 1, candidate 4 (gold[0]=(6196076.0,), cand[0]=(105273500.0,))
+  [13/20] FAIL MTQ13 [MT07    ]   0.9s  <- gold=(499.75,) cand=('N/A',)
+  [14/20] FAIL MTQ14 [MT07    ]   1.2s  <- gold=(250.606,) cand=(242.9763,)
+  [15/20] FAIL MTQ15 [MT08    ]   0.6s  <- gold=(1997.0,) cand=(1843.0,)
+  [16/20] FAIL MTQ16 [MT08    ]   0.6s  <- gold=(203.0,) cand=(357.0,)
+  [17/20] PASS MTQ17 [control ]   0.6s
+  [18/20] PASS MTQ18 [control ]   0.5s
+  [19/20] PASS MTQ19 [control ]   0.6s
+  [20/20] FAIL MTQ20 [MT01,MT02,MT04,MT06]   2.5s  <- MySQL error 1111: Invalid use of group function
+  -> 6/20 = 30.0%  (27.0s)   written to eval\out\milk_tea\baseline-local-milk-tea-20260919.json
+
+=== HARNESS (local, knowledge=curated) -- 20 questions ===
+  [ 1/20] PASS MTQ01 [MT01    ]  13.9s
+  [ 2/20] PASS MTQ02 [MT01    ]  13.5s
+  [ 3/20] PASS MTQ03 [MT02    ]   6.6s
+  [ 4/20] PASS MTQ04 [MT02    ]   4.6s
+  [ 5/20] FAIL MTQ05 [MT03    ]  12.6s  <- gold=(21957.0,) cand=(20097.0,)
+  [ 6/20] FAIL MTQ06 [MT03    ]  18.5s  <- gold=(2876.0,) cand=(11490.0,)
+  [ 7/20] FAIL MTQ07 [MT04    ]  10.8s  <- gold=(5620000.0,) cand=(6020000.0,)
+  [ 8/20] PASS MTQ08 [MT04    ]   7.2s
+  [ 9/20] PASS MTQ09 [MT05    ]   4.6s
+  [10/20] PASS MTQ10 [MT05    ]   5.6s
+  [11/20] PASS MTQ11 [MT06    ]  16.9s
+  [12/20] FAIL MTQ12 [MT06    ]  14.5s  <- gold=(6196076.0,) cand=(6596076.0,)
+  [13/20] PASS MTQ13 [MT07    ]   8.0s
+  [14/20] PASS MTQ14 [MT07    ]   8.0s
+  [15/20] PASS MTQ15 [MT08    ]   4.8s
+  [16/20] PASS MTQ16 [MT08    ]   5.4s
+  [17/20] PASS MTQ17 [control ]   2.7s
+  [18/20] PASS MTQ18 [control ]   1.3s
+  [19/20] PASS MTQ19 [control ]   1.4s
+  [20/20] FAIL MTQ20 [MT01,MT02,MT04,MT06]  85.5s  <- Hit the 12-step limit without a final answer.
+  -> 15/20 = 75.0%  (246.4s)   written to eval\out\milk_tea\harness-local-milk-tea-20260919.json
+
+LIFT: 30.0% -> 75.0%  (+45.0 points)
+
+Render the per-defect breakdown with:  python eval/report.py
